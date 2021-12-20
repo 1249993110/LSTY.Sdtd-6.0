@@ -13,5 +13,7 @@ namespace LSTY.Sdtd.PatronsMod.Internal
         public string AccessToken { get; set; }
 
         public bool EnableErrorPage { get; set; }
+
+        public bool EnableCors { get; set; }
     }
 }

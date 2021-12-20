@@ -1,23 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using UnityEngine;
-using System.Diagnostics;
-using System.Reflection;
+﻿using HarmonyLib;
+using LSTY.Sdtd.PatronsMod.Internal;
+using LSTY.Sdtd.PatronsMod.SignalR;
 using LSTY.Sdtd.Shared;
 using Microsoft.Owin.Hosting;
-using Owin;
-using Microsoft.AspNet.SignalR;
-using LSTY.Sdtd.PatronsMod.Internal;
-using IceCoffee.Common;
-using Pathfinding;
-using System.Collections.Generic;
-using HarmonyLib;
-using IceCoffee.Common.Extensions;
 using Platform.Local;
-using LSTY.Sdtd.PatronsMod.SignalR;
+using System.Reflection;
 
 namespace LSTY.Sdtd.PatronsMod
 {
@@ -87,6 +74,7 @@ namespace LSTY.Sdtd.PatronsMod
         {
             try
             {
+                Log.LogCallbacks += ModEventHook.LogCallback;
                 ModEvents.GameAwake.RegisterHandler(ModEventHook.GameAwake);
                 ModEvents.GameStartDone.RegisterHandler(ModEventHook.GameStartDone);
                 ModEvents.GameShutdown.RegisterHandler(ModEventHook.GameShutdown);
@@ -105,6 +93,5 @@ namespace LSTY.Sdtd.PatronsMod
                 throw;
             }
         }
-
     }
 }

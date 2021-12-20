@@ -16,6 +16,7 @@
 	<ItemGroup>
 		<PackageReference Include="Lib.Harmony" Version="2.1.1" />
 		<PackageReference Include="Microsoft.AspNet.SignalR.SelfHost" Version="2.4.2" />
+		<PackageReference Include="Microsoft.Owin.Cors" Version="4.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -6,6 +6,7 @@ using Microsoft.AspNet.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace LSTY.Sdtd.PatronsMod.Internal
 {
@@ -23,6 +24,14 @@ namespace LSTY.Sdtd.PatronsMod.Internal
             {
                 CustomLogger.Error(ex.ToString());
             }
+        }
+
+        public static void LogCallback(string message, string trace, LogType type)
+        {
+            Task.Factory.StartNew((state) =>
+            {
+                _hub.OnLogCallback((string)state);
+            }, message);
         }
 
         public static void GameAwake()

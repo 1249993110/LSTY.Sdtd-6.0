@@ -56,20 +56,34 @@
                 access_token: null,
             };
         },
+        created() {
+            this.init();
+        },
         methods: {
             init() {
-                var connection = $.hubConnection();
-                var contosoChatHubProxy = connection.createHubProxy('serverManageHub');
-                contosoChatHubProxy.on('addContosoChatMessageToPage', function (name, message) {
-                    console.log(name + ' ' + message);
+                var connection = $.hubConnection(this.signalRUrl);
+                connection.logging = true;
+
+                if (this.access_token) {
+                    connection.qs = { 'access-token': this.access_token };
+                }
+
+                connection.error(function (error) {
+                    console.log('SignalR error: ' + error)
                 });
-                connection.start().done(function () {
-                    // Wire up Send button to call NewContosoChatMessage on the server.
-                    $('#newContosoChatMessage').click(function () {
-                        contosoChatHubProxy.invoke('newContosoChatMessage', );
-                        
-                    });
+                var serverManageHubProxy = connection.createHubProxy('IServerManageHub');
+                var modEventHookHubProxy = connection.createHubProxy('IModEventHookHub');
+                modEventHookHubProxy.on('OnLogCallback', function (message) {
+                    console.log(message);
                 });
+                connection.start({ transport: ['webSockets'] })
+                    .done(function () {
+                        console.log('Now connected, connection ID=' + connection.id);
+                        serverManageHubProxy.invoke('ExecuteConsoleCommand', 'say hello', false);
+                    })
+                    .fail(function () { console.log('Could not connect'); });
+
+                this.connection = connection;
             },
             sendMsg() {
                 let params = {

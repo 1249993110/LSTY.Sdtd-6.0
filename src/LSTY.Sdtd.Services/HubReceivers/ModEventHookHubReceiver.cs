@@ -14,6 +14,7 @@ namespace LSTY.Sdtd.Services.HubReceivers
     {
         private IHubProxy _hubProxy;
 
+        public event Action<string> LogCallback;
         public event Action<ChatMessage> ChatMessage;
         public event Action<Entity> EntitySpawned;
         public event Action GameAwake;
@@ -35,6 +36,7 @@ namespace LSTY.Sdtd.Services.HubReceivers
 
         private void Subscribe(IModEventHookHub hub)
         {
+            //_hubProxy.On<string>(hub.OnLogCallback);
             _hubProxy.On(hub.OnGameAwake);
             _hubProxy.On(hub.OnGameShutdown);
             _hubProxy.On(hub.OnGameStartDone);
@@ -46,6 +48,11 @@ namespace LSTY.Sdtd.Services.HubReceivers
             _hubProxy.On<LivePlayer>(hub.OnPlayerSpawning);
             _hubProxy.On<PlayerSpawnedEventArgs>(hub.OnPlayerSpawnedInWorld);
             _hubProxy.On<Entity, int>(hub.OnEntityKilled);
+        }
+
+        void IModEventHookHub.OnLogCallback(string message)
+        {
+            LogCallback?.Invoke(message);
         }
 
         void IModEventHookHub.OnGameAwake()
