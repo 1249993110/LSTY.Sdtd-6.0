@@ -12,7 +12,6 @@ namespace LSTY.Sdtd.Services.HubReceivers
 {
     public class ModEventHookHubReceiver : IModEventHookHub
     {
-        private readonly SignalRManager _signalRManager;
         private IHubProxy _hubProxy;
 
         public event Action<ChatMessage> ChatMessage;
@@ -21,20 +20,14 @@ namespace LSTY.Sdtd.Services.HubReceivers
         public event Action GameShutdown;
         public event Action GameStartDone;
 
-        public event Action<string> PlayerDisconnected;
-        public event Action<OnlinePlayer> SavePlayerData;
-        public event Action<OnlinePlayer> PlayerSpawning;
+        public event Action<int> PlayerDisconnected;
+        public event Action<LivePlayer> SavePlayerData;
+        public event Action<LivePlayer> PlayerSpawning;
         public event Action<PlayerSpawnedEventArgs> PlayerSpawnedInWorld;
-        public event Action<Entity, string> EntityKilled;
+        public event Action<Entity, int> EntityKilled;
 
 
-        public ModEventHookHubReceiver(SignalRManager signalRManager)
-        {
-            _signalRManager = signalRManager;
-            _signalRManager.Ready += OnSignalRManager_Ready;
-        }
-
-        private void OnSignalRManager_Ready(HubConnection hubConnection)
+        public ModEventHookHubReceiver(HubConnection hubConnection)
         {
             _hubProxy = hubConnection.CreateHubProxy(nameof(IModEventHookHub));
             Subscribe(this);
@@ -42,27 +35,17 @@ namespace LSTY.Sdtd.Services.HubReceivers
 
         private void Subscribe(IModEventHookHub hub)
         {
-            _hubProxy.On<ChatMessage>(hub.OnChatMessage);
-            _hubProxy.On<Entity>(hub.OnEntitySpawned);
             _hubProxy.On(hub.OnGameAwake);
             _hubProxy.On(hub.OnGameShutdown);
             _hubProxy.On(hub.OnGameStartDone);
 
-            _hubProxy.On<string>(hub.OnPlayerDisconnected);
-            _hubProxy.On<OnlinePlayer>(hub.OnSavePlayerData);
-            _hubProxy.On<OnlinePlayer>(hub.OnPlayerSpawning);
+            _hubProxy.On<Entity>(hub.OnEntitySpawned);
+            _hubProxy.On<ChatMessage>(hub.OnChatMessage);
+            _hubProxy.On<int>(hub.OnPlayerDisconnected);
+            _hubProxy.On<LivePlayer>(hub.OnSavePlayerData);
+            _hubProxy.On<LivePlayer>(hub.OnPlayerSpawning);
             _hubProxy.On<PlayerSpawnedEventArgs>(hub.OnPlayerSpawnedInWorld);
-            _hubProxy.On<Entity, string>(hub.OnEntityKilled);
-        }
-
-        void IModEventHookHub.OnChatMessage(ChatMessage chatMessage)
-        {
-            ChatMessage?.Invoke(chatMessage);
-        }
-
-        void IModEventHookHub.OnEntitySpawned(Entity entity)
-        {
-            EntitySpawned?.Invoke(entity);
+            _hubProxy.On<Entity, int>(hub.OnEntityKilled);
         }
 
         void IModEventHookHub.OnGameAwake()
@@ -80,19 +63,28 @@ namespace LSTY.Sdtd.Services.HubReceivers
             GameStartDone?.Invoke();
         }
 
-        void IModEventHookHub.OnPlayerDisconnected(string steamId)
+        void IModEventHookHub.OnEntitySpawned(Entity entity)
         {
-            PlayerDisconnected?.Invoke(steamId);
+            EntitySpawned?.Invoke(entity);
+        }
+        void IModEventHookHub.OnChatMessage(ChatMessage chatMessage)
+        {
+            ChatMessage?.Invoke(chatMessage);
         }
 
-        void IModEventHookHub.OnSavePlayerData(OnlinePlayer onlinePlayer)
+        void IModEventHookHub.OnPlayerDisconnected(int entityId)
         {
-            SavePlayerData?.Invoke(onlinePlayer);
+            PlayerDisconnected?.Invoke(entityId);
         }
 
-        void IModEventHookHub.OnPlayerSpawning(OnlinePlayer onlinePlayer)
+        void IModEventHookHub.OnSavePlayerData(LivePlayer livePlayer)
         {
-            PlayerSpawning?.Invoke(onlinePlayer);
+            SavePlayerData?.Invoke(livePlayer);
+        }
+
+        void IModEventHookHub.OnPlayerSpawning(LivePlayer livePlayer)
+        {
+            PlayerSpawning?.Invoke(livePlayer);
         }
 
         void IModEventHookHub.OnPlayerSpawnedInWorld(PlayerSpawnedEventArgs playerSpawnedEventArgs)
@@ -100,9 +92,9 @@ namespace LSTY.Sdtd.Services.HubReceivers
             PlayerSpawnedInWorld?.Invoke(playerSpawnedEventArgs);
         }
 
-        void IModEventHookHub.OnEntityKilled(Entity entity, string steamIdThatKilledMe)
+        void IModEventHookHub.OnEntityKilled(Entity entity, int entityIdThatKilledMe)
         {
-            EntityKilled?.Invoke(entity, steamIdThatKilledMe);
+            EntityKilled?.Invoke(entity, entityIdThatKilledMe);
         }
     }
 }

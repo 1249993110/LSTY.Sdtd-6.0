@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LSTY.Sdtd.Services.Configs
+namespace LSTY.Sdtd.Services.Models
 {
-    public class GameNoticeConfig
+    public class GameNoticeSettings
     {
         /// <summary>
         /// 是否启用功能

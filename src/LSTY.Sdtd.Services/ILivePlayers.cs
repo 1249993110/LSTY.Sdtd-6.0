@@ -5,21 +5,21 @@ using System.Text;
 
 namespace LSTY.Sdtd.Services
 {
-    public interface IOnlinePlayers
+    public interface ILivePlayers
     {
-        OnlinePlayer this[string steamId] { get; }
+        LivePlayer this[int entityId] { get; }
 
         /// <summary>
         /// 隐藏默认的 TryGetValue，如果本地不存在玩家，则通过 SignalR 从游戏服务器获取
         /// </summary>
-        /// <param name="steamId"></param>
-        /// <param name="onlinePlayer"></param>
+        /// <param name="entityId"></param>
+        /// <param name="livePlayer"></param>
         /// <returns></returns>
-        bool TryGetPlayer(string steamId, out OnlinePlayer onlinePlayer);
+        bool TryGetPlayer(int entityId, out LivePlayer livePlayer);
 
-        IEnumerable<string> Keys { get; }
+        IEnumerable<int> Keys { get; }
 
-        IEnumerable<OnlinePlayer> Values { get; }
+        IEnumerable<LivePlayer> Values { get; }
 
         bool IsEmpty { get; }
 

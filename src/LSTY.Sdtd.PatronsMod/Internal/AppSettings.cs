@@ -11,5 +11,7 @@ namespace LSTY.Sdtd.PatronsMod.Internal
         public string SignalRUrl { get; set; }
 
         public string AccessToken { get; set; }
+
+        public bool EnableErrorPage { get; set; }
     }
 }

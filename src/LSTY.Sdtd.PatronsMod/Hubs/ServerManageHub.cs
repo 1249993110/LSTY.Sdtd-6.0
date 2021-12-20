@@ -41,29 +41,29 @@ namespace LSTY.Sdtd.PatronsMod
             
         }
 
-        public async Task<OnlinePlayer> GetOnlinePlayer(int entityId)
+        public async Task<LivePlayer> GetLivePlayer(int entityId)
         {
             return await Task.Factory.StartNew((state) =>
             {
-                return ConnectionManager.Instance.Clients.ForEntityId((int)state)?.ToOnlinePlayer();
+                return ConnectionManager.Instance.Clients.ForEntityId((int)state)?.ToLivePlayer();
             }, entityId);
         }
 
-        public async Task<List<OnlinePlayer>> GetOnlinePlayers()
+        public async Task<List<LivePlayer>> GetLivePlayers()
         {
             return await Task.Run(() =>
             {
-                List<OnlinePlayer> list = new List<OnlinePlayer>();
+                List<LivePlayer> list = new List<LivePlayer>();
                 foreach (var client in ConnectionManager.Instance.Clients.List)
                 {
-                    list.Add(client.ToOnlinePlayer());
+                    list.Add(client.ToLivePlayer());
                 }
 
                 return list;
             });
         }
 
-        public async Task<int> GetOnlinePlayerCount()
+        public async Task<int> GetLivePlayerCount()
         {
             return await Task.FromResult(GameManager.Instance.World.Players.Count);
         }

@@ -10,7 +10,7 @@ namespace LSTY.Sdtd.PatronsMod.Extensions
 {
     internal static class ClientInfoExtension
     {
-        public static OnlinePlayer ToOnlinePlayer(this ClientInfo clientInfo)
+        public static LivePlayer ToLivePlayer(this ClientInfo clientInfo)
         {
             try
             {
@@ -18,7 +18,7 @@ namespace LSTY.Sdtd.PatronsMod.Extensions
                 Progression progression = GetProgression(pdf);
                 var landProtection = GetLandProtectionActiveAndMultiplier(clientInfo.entityId);
 
-                return new OnlinePlayer()
+                return new LivePlayer()
                 {
                     PlatformUserId = clientInfo.PlatformId.ReadablePlatformUserIdentifier,
                     PlatformType = clientInfo.PlatformId.PlatformIdentifierString,
@@ -42,7 +42,7 @@ namespace LSTY.Sdtd.PatronsMod.Extensions
             }
             catch (Exception ex)
             {
-                CustomLogger.Warn(ex, "ClientInfo to OnlinePlayer failed");
+                CustomLogger.Warn(ex, "ClientInfo to LivePlayer failed");
                 return null;
             }
         }

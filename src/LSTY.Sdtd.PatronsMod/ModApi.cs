@@ -40,6 +40,8 @@ namespace LSTY.Sdtd.PatronsMod
             {
                 _mainThreadContext = SynchronizationContext.Current;
 
+                StartupSignalR();
+
                 PatchByHarmony();
 
                 RegisterModEventHandlers();

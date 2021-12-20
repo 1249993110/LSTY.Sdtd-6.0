@@ -1,7 +1,12 @@
 ﻿using IceCoffee.Common.Timers;
+using IceCoffee.DbCore;
+using LSTY.Sdtd.Services.Managers;
+using LSTY.Sdtd.Services.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,16 +17,13 @@ namespace LSTY.Sdtd.Services
     {
         private readonly ILogger<Worker> _logger;
         private readonly SignalRManager _signalRManager;
-        private readonly FunctionManager _functionFactory;
-        private readonly string _signalRUrl;
+        private readonly FunctionFactory _functionManager;
 
-        public Worker(ILoggerFactory loggerFactory, ILogger<Worker> logger, SignalRManager signalRManager, IConfiguration configuration, FunctionManager functionFactory)
+        public Worker(ILogger<Worker> logger, SignalRManager signalRManager, FunctionFactory functionManager)
         {
-            loggerFactory.CreateLogger<Worker>();
             _logger = logger;
             _signalRManager = signalRManager;
-            this._functionFactory = functionFactory;
-            _signalRUrl = configuration.GetSection("SignalRUrl").Value;
+            _functionManager = functionManager;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,14 +32,11 @@ namespace LSTY.Sdtd.Services
             {
                 if (stoppingToken.IsCancellationRequested == false)
                 {
-                    // 初始化功能工厂
-                    _functionFactory.Initialize();
-
-                    // 启动全局时钟
-                    GlobalTimer.Start();
-
                     // 连接 SignalR 服务端
-                    await _signalRManager.ConnectAsync(_signalRUrl);
+                    await _signalRManager.ConnectAsync();
+
+                    // 初始化功能
+                    _functionManager.Initialize();
                 }
             }
             catch (Exception ex)

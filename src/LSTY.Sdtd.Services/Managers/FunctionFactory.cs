@@ -5,15 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace LSTY.Sdtd.Services
+namespace LSTY.Sdtd.Services.Managers
 {
-    public class FunctionManager
+    public class FunctionFactory
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<FunctionManager> _logger;
+        private readonly ILogger<FunctionFactory> _logger;
         private readonly Dictionary<Type, FunctionBase> _functionDict;
 
-        public FunctionManager(IServiceProvider serviceProvider, ILogger<FunctionManager> logger)
+        public FunctionFactory(IServiceProvider serviceProvider, ILogger<FunctionFactory> logger)
         {
             this._serviceProvider = serviceProvider;
             this._logger = logger;
@@ -39,10 +39,7 @@ namespace LSTY.Sdtd.Services
         {
             try
             {
-                var method = typeof(FunctionBase).GetMethod(nameof(FunctionBase.InjectAndInit), BindingFlags.NonPublic | BindingFlags.Static);
-                method.Invoke(null, GetParameters(method));
-
-                foreach (var type in typeof(FunctionManager).Assembly.GetExportedTypes())
+                foreach (var type in typeof(FunctionFactory).Assembly.GetExportedTypes())
                 {
                     if (type.IsSubclassOf(typeof(FunctionBase)) && type.IsAbstract == false)
                     {

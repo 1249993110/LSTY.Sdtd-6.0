@@ -8,6 +8,11 @@ namespace LSTY.Sdtd.PatronsMod.SignalR
     {
         public void Configuration(IAppBuilder app)
         {
+            if (ModApi.AppSettings.EnableErrorPage)
+            {
+                app.UseErrorPage();
+            }
+            
             app.MapSignalR(new HubConfiguration()
             {
                 EnableJSONP = false,

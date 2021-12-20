@@ -2,7 +2,7 @@
 
 namespace LSTY.Sdtd.Shared.Models
 {
-    public class OnlinePlayer : PlayerBase
+    public class LivePlayer : PlayerBase
     {
         public string IP { get; set; }
         public int ExpToNextLevel { get; set; }

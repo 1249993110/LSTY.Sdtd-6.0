@@ -119,4 +119,10 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<PostBuildEvent>
+			cd /D "H:\steam\steamapps\common\7 Days to Die Dedicated Server"
+			powershell start-process -FilePath startdedicated.bat
+		</PostBuildEvent>
+	</PropertyGroup>
 </Project>

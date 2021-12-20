@@ -9,10 +9,10 @@ namespace LSTY.Sdtd.Shared.Hubs
     {
         Task<List<string>> ExecuteConsoleCommand(string command, bool inMainThread = false);
 
-        Task<OnlinePlayer> GetOnlinePlayer(int entityId);
+        Task<LivePlayer> GetLivePlayer(int entityId);
 
-        Task<List<OnlinePlayer>> GetOnlinePlayers();
+        Task<List<LivePlayer>> GetLivePlayers();
 
-        Task<int> GetOnlinePlayerCount();
+        Task<int> GetLivePlayerCount();
     }
 }

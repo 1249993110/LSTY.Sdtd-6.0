@@ -144,7 +144,7 @@ namespace LSTY.Sdtd.PatronsMod.Internal
         {
             Task.Factory.StartNew((state) =>
             {
-                _hub.OnSavePlayerData(((ClientInfo)state).ToOnlinePlayer());
+                _hub.OnSavePlayerData(((ClientInfo)state).ToLivePlayer());
             }, clientInfo);
         }
 
@@ -152,7 +152,7 @@ namespace LSTY.Sdtd.PatronsMod.Internal
         {
             Task.Factory.StartNew((state) =>
             {
-                _hub.OnPlayerSpawning(((ClientInfo)state).ToOnlinePlayer());
+                _hub.OnPlayerSpawning(((ClientInfo)state).ToLivePlayer());
             }, clientInfo);
         }
 

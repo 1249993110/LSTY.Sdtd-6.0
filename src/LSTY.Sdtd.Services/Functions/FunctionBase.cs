@@ -1,18 +1,11 @@
-﻿using IceCoffee.Common.Templates;
-using LSTY.Sdtd.Data.Entities;
-using LSTY.Sdtd.Data.IRepositories;
+﻿using LSTY.Sdtd.Data.IRepositories;
+using LSTY.Sdtd.Services.Models;
 using LSTY.Sdtd.Services.Extensions;
 using LSTY.Sdtd.Services.HubReceivers;
-using LSTY.Sdtd.Services.Internal;
-using LSTY.Sdtd.Services.Models;
-using LSTY.Sdtd.Services.Models.Configs;
-using LSTY.Sdtd.Shared;
+using LSTY.Sdtd.Services.Managers;
 using LSTY.Sdtd.Shared.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace LSTY.Sdtd.Services.Functions
 {
@@ -22,6 +15,7 @@ namespace LSTY.Sdtd.Services.Functions
         private bool _isEnabled;
         private bool _isRunning;
         public string FunctionName => _functionName;
+
         public bool IsEnabled
         {
             get => _isEnabled;
@@ -40,60 +34,50 @@ namespace LSTY.Sdtd.Services.Functions
             }
         }
 
-        private static ILogger<FunctionBase> _logger;
-        private static BasicConfig _basicConfig;
-        private static ModEventHookHubReceiver _modEventHookHubReceiver;
-        private static ServerManageHubReceiver _serverManageHubReceiver;
-        private static IOnlinePlayers _onlinePlayers;
+        private readonly IOptionsMonitor<FunctionSettings> _optionsMonitor;
 
-        protected static ModEventHookHubReceiver ModEventHookHubReceiver => _modEventHookHubReceiver;
-        protected static ServerManageHubReceiver ServerManageHubReceiver => _serverManageHubReceiver;
-        protected static IOnlinePlayers OnlinePlayers => _onlinePlayers;
+        protected readonly ILogger Logger;
+        protected FunctionSettings FunctionSettings => _optionsMonitor.CurrentValue;
+        protected readonly ModEventHookHubReceiver ModEventHookHub;
+        protected readonly ServerManageHubReceiver ServerManageHub;
+        protected readonly ILivePlayers LivePlayers;
 
-        /// <summary>
-        /// 静态注入并初始化
-        /// </summary>
-        internal static void InjectAndInit(
-            ILogger<FunctionBase> logger,
-            IChatLogRepository chatLogRepository, 
-            ModEventHookHubReceiver modEventHookHubReceiver,
-            ServerManageHubReceiver serverManageHubReceiver,
-            IOnlinePlayers onlinePlayers)
-        {
-            _logger = logger;
 
-            _modEventHookHubReceiver = modEventHookHubReceiver;
-            _serverManageHubReceiver = serverManageHubReceiver;
-            _onlinePlayers = onlinePlayers;
-        }
-
-        protected abstract void OnConfigChanged(FunctionConfig functionConfigs, string name);
-
-        protected static void SendGlobalMessage(string message)
-        {
-            _serverManageHubReceiver.SendGlobalMessage(message, _basicConfig.ServerName).Wait();
-        }
-
-        protected static void SendMessageToPlayer(string playerId, string message)
-        {
-            _serverManageHubReceiver.SendMessageToPlayer(playerId, message, _basicConfig.ServerName).Wait();
-        }
-
-        public FunctionBase()
+        public FunctionBase(ILoggerFactory loggerFactory, IOptionsMonitor<FunctionSettings> optionsMonitor, SignalRManager signalRManager, ILivePlayers livePlayers)
         {
             _functionName = this.GetType().Name;
-            _onlinePlayers.ServerNonePlayer += PrivateDisableFunction;
-            _onlinePlayers.ServerHavePlayerAgain += PrivateEnableFunction;
+            Logger = loggerFactory.CreateLogger(this.GetType());
+
+            _optionsMonitor = optionsMonitor;
+            _optionsMonitor.OnChange(OnSettingsChanged);
+
+            ModEventHookHub = signalRManager.ModEventHookHub;
+            ServerManageHub = signalRManager.ServerManageHub;
+            LivePlayers = livePlayers;
+            LivePlayers.ServerNonePlayer += PrivateDisableFunction;
+            LivePlayers.ServerHavePlayerAgain += PrivateEnableFunction;
+        }
+
+        protected abstract void OnSettingsChanged(FunctionSettings settings);
+
+        protected void SendGlobalMessage(string message)
+        {
+            ServerManageHub.SendGlobalMessage(message, FunctionSettings.ServerName).Wait();
+        }
+
+        protected void SendMessageToPlayer(object playerIdOrName, string message)
+        {
+            ServerManageHub.SendMessageToPlayer(playerIdOrName, message, FunctionSettings.ServerName).Wait();
         }
 
         /// <summary>
-        /// Prevent duplicate settings 
+        /// Prevent duplicate settings
         /// </summary>
         private void PrivateDisableFunction()
         {
             lock (this)
             {
-                // If the function is not disabled 
+                // If the function is not disabled
                 if (_isRunning)
                 {
                     _isRunning = false;
@@ -103,7 +87,7 @@ namespace LSTY.Sdtd.Services.Functions
         }
 
         /// <summary>
-        /// Prevent duplicate settings 
+        /// Prevent duplicate settings
         /// </summary>
         private void PrivateEnableFunction()
         {
@@ -115,7 +99,7 @@ namespace LSTY.Sdtd.Services.Functions
                     _isRunning = EnableFunctionNonePlayer();
 
                     // only there are players on the server
-                    if (OnlinePlayers.IsEmpty == false)
+                    if (LivePlayers.IsEmpty == false)
                     {
                         _isRunning = true;
                         EnableFunction();
@@ -129,7 +113,6 @@ namespace LSTY.Sdtd.Services.Functions
         /// </summary>
         protected virtual void DisableFunction()
         {
-           
         }
 
         /// <summary>
@@ -137,39 +120,29 @@ namespace LSTY.Sdtd.Services.Functions
         /// </summary>
         protected virtual void EnableFunction()
         {
-            
         }
 
         /// <summary>
-        /// Enabled function, regardless of whether there are players on the server , return value will set to _isRunning
+        /// Enabled function, 无论服务器上是否有玩家, 返回值将设置到 _isRunning
         /// </summary>
         protected virtual bool EnableFunctionNonePlayer()
         {
             return false;
         }
-       
 
-        /// <summary>
-        /// Call when capturing player chat message, return true mean this message were handled by current function
-        /// </summary>
-        protected virtual bool OnPlayerChatHooked(OnlinePlayer onlinePlayer, string message)
+        protected virtual string FormatCmd(string message, PlayerBase player)
         {
-            return false;
-        }
-
-        private static bool HandleChatMessage(ChatHook chatHook, string steamId, string message)
-        {
-            try
+            if (string.IsNullOrEmpty(message))
             {
-                return chatHook.Invoke(_onlinePlayers[steamId], message);
+                return string.Empty;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in chathook");
-                SendMessageToPlayer(steamId, _basicConfig.HandleChatMessageErrorTips);
-                return false;
-            }
-        }
 
+            if (player == null)
+            {
+                return message;
+            }
+
+            return IceCoffee.Common.Templates.StringTemplate.Render(message, player);
+        }
     }
 }

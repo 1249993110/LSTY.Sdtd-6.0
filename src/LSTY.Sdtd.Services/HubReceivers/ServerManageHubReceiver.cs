@@ -6,16 +6,9 @@ namespace LSTY.Sdtd.Services.HubReceivers
 {
     public class ServerManageHubReceiver : IServerManageHub
     {
-        private readonly SignalRManager _signalRManager;
-        private IHubProxy _hubProxy;
+        private readonly IHubProxy _hubProxy;
 
-        public ServerManageHubReceiver(SignalRManager signalRManager)
-        {
-            _signalRManager = signalRManager;
-            _signalRManager.Ready += OnSignalRManager_Ready;
-        }
-
-        private void OnSignalRManager_Ready(HubConnection hubConnection)
+        public ServerManageHubReceiver(HubConnection hubConnection)
         {
             _hubProxy = hubConnection.CreateHubProxy(nameof(IServerManageHub));
         }
@@ -25,19 +18,19 @@ namespace LSTY.Sdtd.Services.HubReceivers
             return _hubProxy.Invoke<List<string>>(nameof(IServerManageHub.ExecuteConsoleCommand), new object[] { command, inMainThread });
         }
 
-        public Task<OnlinePlayer> GetOnlinePlayer(int entityId)
+        public Task<LivePlayer> GetLivePlayer(int entityId)
         {
-            return _hubProxy.Invoke<OnlinePlayer>(nameof(IServerManageHub.GetOnlinePlayer), new object[] { entityId });
+            return _hubProxy.Invoke<LivePlayer>(nameof(IServerManageHub.GetLivePlayer), new object[] { entityId });
         }
 
-        public Task<List<OnlinePlayer>> GetOnlinePlayers()
+        public Task<List<LivePlayer>> GetLivePlayers()
         {
-            return _hubProxy.Invoke<List<OnlinePlayer>>(nameof(IServerManageHub.GetOnlinePlayers));
+            return _hubProxy.Invoke<List<LivePlayer>>(nameof(IServerManageHub.GetLivePlayers));
         }
 
-        public Task<int> GetOnlinePlayerCount()
+        public Task<int> GetLivePlayerCount()
         {
-            return _hubProxy.Invoke<int>(nameof(IServerManageHub.GetOnlinePlayerCount));
+            return _hubProxy.Invoke<int>(nameof(IServerManageHub.GetLivePlayerCount));
         }
     }
 }

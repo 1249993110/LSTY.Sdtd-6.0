@@ -1,33 +1,48 @@
-﻿using Microsoft.AspNet.SignalR.Client;
+﻿using LSTY.Sdtd.Services.HubReceivers;
+using LSTY.Sdtd.Services.Models;
+using Microsoft.AspNet.SignalR.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace LSTY.Sdtd.Services
+namespace LSTY.Sdtd.Services.Managers
 {
     public class SignalRManager
     {
         private readonly ILogger<SignalRManager> _logger;
+        private readonly FunctionSettings _functionSettings;
         private HubConnection _hubConnection;
 
-        public SignalRManager(ILogger<SignalRManager> logger)
+        public SignalRManager(ILogger<SignalRManager> logger, IOptionsMonitor<FunctionSettings> optionsMonitor)
         {
-            this._logger = logger;
+            _logger = logger;
+            _functionSettings = optionsMonitor.CurrentValue;
         }
 
-        public event Action<HubConnection> Ready;
+        public ServerManageHubReceiver ServerManageHub {  get; private set; }
+        public ModEventHookHubReceiver ModEventHookHub {  get; private set; }
 
         public event Action Disconnected;
 
         public event Action Connected;
 
-        public async Task ConnectAsync(string serverUrl)
+        public async Task ConnectAsync()
         {
-            _hubConnection = new HubConnection(serverUrl);
-            //_hubConnection.Headers.Add("myauthtoken", /* token data */);
+            string signalRUrl = _functionSettings.SignalRUrl;
+            string accessToken = _functionSettings.SignalRAccessToken;
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                _hubConnection = new HubConnection(signalRUrl);
+            }
+            else
+            {
+                _hubConnection = new HubConnection(signalRUrl, "?access-token=" + accessToken);
+            }
+
             _hubConnection.Error += OnConnectionError;
             _hubConnection.Closed += OnConnectionClosed;
 
-            Ready?.Invoke(_hubConnection);
-            // Ready = null;
+            ServerManageHub = new ServerManageHubReceiver(_hubConnection);
+            ModEventHookHub = new ModEventHookHubReceiver(_hubConnection);
 
             await Start();
         }

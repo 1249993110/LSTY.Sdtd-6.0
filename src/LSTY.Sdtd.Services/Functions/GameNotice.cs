@@ -1,33 +1,37 @@
 ﻿using IceCoffee.Common.Timers;
-using LSTY.Sdtd.Services.Models.Configs;
+using LSTY.Sdtd.Services.Models;
+using LSTY.Sdtd.Services.Managers;
 using LSTY.Sdtd.Shared.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LSTY.Sdtd.Services.Functions
 {
     public class GameNotice : FunctionBase
     {
-        private SubTimer _timer;
-        private readonly ILogger<GameNotice> _logger;
+        private readonly SubTimer _timer;
+        private readonly GameNoticeSettings _settings;
 
-        public GameNotice(ILogger<GameNotice> logger)
+        public GameNotice(ILoggerFactory loggerFactory, IOptionsMonitor<FunctionSettings> optionsMonitor, SignalRManager signalRManager, ILivePlayers livePlayers)
+            : base(loggerFactory, optionsMonitor, signalRManager, livePlayers)
         {
-            this._logger = logger;
-            _timer = new SubTimer(SendAlternateNotice, Config.AlternateInterval);
+            _settings = FunctionSettings.GameNoticeSettings;
+            _timer = new SubTimer(SendAlternateNotice, _settings.AlternateInterval);
         }
 
-        protected override void OnConfigChanged()
+        protected override void OnSettingsChanged(FunctionSettings settings)
         {
-            _timer.Interval = Config.AlternateInterval;
+            _timer.Interval = settings.GameNoticeSettings.AlternateInterval;
         }
 
         private void SendAlternateNotice()
         {
-            if (Config.AlternateNotices.Length > 0)
+            var alternateNotices = _settings.AlternateNotices;
+            if (alternateNotices.Length > 0)
             {
                 Random rd = new Random();
-                int index = rd.Next(Config.AlternateNotices.Length);
-                SendGlobalMessage(Config.AlternateNotices[index]);
+                int index = rd.Next(alternateNotices.Length);
+                SendGlobalMessage(alternateNotices[index]);
             }
         }
 
@@ -35,14 +39,14 @@ namespace LSTY.Sdtd.Services.Functions
         {
             _timer.IsEnabled = false;
             GlobalTimer.UnregisterSubTimer(_timer);
-            ModEventHookHubReceiver.PlayerSpawnedInWorld -= PlayerSpawnedInWorld;
+            ModEventHookHub.PlayerSpawnedInWorld -= PlayerSpawnedInWorld;
         }
 
         protected override void EnableFunction()
         {
             _timer.IsEnabled = true;
             GlobalTimer.RegisterSubTimer(_timer);
-            ModEventHookHubReceiver.PlayerSpawnedInWorld += PlayerSpawnedInWorld;
+            ModEventHookHub.PlayerSpawnedInWorld += PlayerSpawnedInWorld;
         }
 
         private void PlayerSpawnedInWorld(PlayerSpawnedEventArgs playerSpawnedEventArgs)
@@ -55,13 +59,14 @@ namespace LSTY.Sdtd.Services.Functions
                     case RespawnType.EnterMultiplayer:
                     // Old player spawning
                     case RespawnType.JoinMultiplayer:
-                        SendMessageToPlayer(playerSpawnedEventArgs.EntityId, FormatCmd(Config.WelcomeNotice, OnlinePlayers[playerSpawnedEventArgs.SteamId]));
+                        SendMessageToPlayer(playerSpawnedEventArgs.EntityId, 
+                            FormatCmd(_settings.WelcomeNotice, LivePlayers[playerSpawnedEventArgs.EntityId]));
                         break;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error in GameNotice.PlayerSpawnedInWorld");
+                Logger.LogWarning(ex, "Error in GameNotice.PlayerSpawnedInWorld");
             }
         }
     }
