@@ -88,13 +88,14 @@ namespace LSTY.Sdtd.WebApi.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
-            try
+
+            if (context.Request.Path == "/ws")
             {
-                if (context.Request.Path == "/ws")
+                try
                 {
                     if (context.WebSockets.IsWebSocketRequest)
                     {
-                        if(string.IsNullOrEmpty(_appSettings.AccessToken) == false)
+                        if (string.IsNullOrEmpty(_appSettings.AccessToken) == false)
                         {
                             // Unauthorized
                             if (context.Request.Query.TryGetValue(ApiKeyAuthenticationHandler.HttpRequestHeaderName, out var value) == false
@@ -131,14 +132,14 @@ namespace LSTY.Sdtd.WebApi.Middlewares
                         context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    await _next(context);
+                    _logger.LogError(ex, "Error in WebSocketMiddleware.Invoke");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Error in WebSocketMiddleware.Invoke");
+                await _next(context);
             }
         }
 

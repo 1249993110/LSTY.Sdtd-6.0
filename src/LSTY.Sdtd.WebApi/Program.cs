@@ -267,7 +267,6 @@ namespace LSTY.Sdtd.WebApi
             app.UseSerilogRequestLogging();
             app.UseMiddleware<GlobalExceptionHandleMiddleware>();
             app.UseForwardedHeaders();
-            app.UsePathBase("/api");
 
             app.Use(async (context, next) =>
             {
@@ -283,6 +282,7 @@ namespace LSTY.Sdtd.WebApi
             app.UseWebSockets();
             app.UseMiddleware<WebSocketMiddleware>();
 
+            app.UsePathBase("/api");
             bool enableSwagger = config.GetSection("EnableSwagger").Get<bool>();
             if (enableSwagger)
             {
