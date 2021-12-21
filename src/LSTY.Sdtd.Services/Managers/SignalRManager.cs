@@ -74,7 +74,13 @@ namespace LSTY.Sdtd.Services.Managers
             Disconnected?.Invoke();
 
             _logger.LogInformation("SignalR connection closed, prepare to try reconnect");
-            Task.Delay(5000).ContinueWith((task, state) => { ((SignalRManager)state).Start().Wait(); }, this);
+
+            Task.Delay(5000).ContinueWith(Reconnect, this);
+        }
+
+        private async Task Reconnect(Task task, object state)
+        {
+            await ((SignalRManager)state).Start();
         }
     }
 }

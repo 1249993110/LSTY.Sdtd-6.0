@@ -5,6 +5,8 @@ using LSTY.Sdtd.Services.HubReceivers;
 using LSTY.Sdtd.Services.Managers;
 using LSTY.Sdtd.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.Net.WebSockets;
 
 namespace LSTY.Sdtd.WebApi.Controllers
 {

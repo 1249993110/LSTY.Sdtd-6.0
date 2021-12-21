@@ -1,7 +1,6 @@
 ﻿using LSTY.Sdtd.PatronsMod.Internal;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
-using Microsoft.Owin.Cors;
 using Owin;
 
 namespace LSTY.Sdtd.PatronsMod.SignalR
@@ -13,11 +12,6 @@ namespace LSTY.Sdtd.PatronsMod.SignalR
             if (ModApi.AppSettings.EnableErrorPage)
             {
                 app.UseErrorPage();
-            }
-
-            if (ModApi.AppSettings.EnableCors)
-            {
-                app.UseCors(CorsOptions.AllowAll);
             }
 
             app.MapSignalR(new HubConfiguration()

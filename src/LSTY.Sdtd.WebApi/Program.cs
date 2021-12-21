@@ -10,6 +10,7 @@ using IceCoffee.DbCore.Utils;
 using LSTY.Sdtd.Data;
 using LSTY.Sdtd.Services.Extensions;
 using LSTY.Sdtd.Services.Models;
+using LSTY.Sdtd.WebApi.Middlewares;
 using LSTY.Sdtd.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -179,26 +180,28 @@ namespace LSTY.Sdtd.WebApi
             #endregion 认证&授权
 
             #region Swagger文档
-
-            // 根据服务的ServiceType和ImplementationType进行判断，如果已存在对应的服务则不添加，适用于为同一个服务添加多个不同的实现的场景
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IApplicationModelProvider, ResponseTypeModelProvider>());
-
-            // Register the Swagger services
-            services.AddOpenApiDocument(config =>
+            bool enableSwagger = config.GetSection("EnableSwagger").Get<bool>();
+            if (enableSwagger)
             {
-                config.GenerateEnumMappingDescription = true;
-                config.PostProcess = document =>
+                // 根据服务的ServiceType和ImplementationType进行判断，如果已存在对应的服务则不添加，适用于为同一个服务添加多个不同的实现的场景
+                services.TryAddEnumerable(ServiceDescriptor.Singleton<IApplicationModelProvider, ResponseTypeModelProvider>());
+
+                // Register the Swagger services
+                services.AddOpenApiDocument(config =>
                 {
-                    document.Info.Version = "v1";
-                    document.Info.Title = "顺德AQI接口";
-                    document.Info.Description = "A simple ASP.NET Core web API";
-                    document.Info.TermsOfService = "https://hycx-gd.cn";
-                    document.Info.Contact = new OpenApiContact()
+                    config.GenerateEnumMappingDescription = true;
+                    config.PostProcess = document =>
                     {
-                        Name = "华云创信（广东）生态环境科技有限公司",
-                        Email = "hycx2019@ciestgd.com",
-                        Url = "https://hycx-gd.cn"
-                    };
+                        document.Info.Version = "v1";
+                        document.Info.Title = "顺德AQI接口";
+                        document.Info.Description = "A simple ASP.NET Core web API";
+                        document.Info.TermsOfService = "https://hycx-gd.cn";
+                        document.Info.Contact = new OpenApiContact()
+                        {
+                            Name = "华云创信（广东）生态环境科技有限公司",
+                            Email = "hycx2019@ciestgd.com",
+                            Url = "https://hycx-gd.cn"
+                        };
                     //document.Info.License = new OpenApiLicense
                     //{
                     //    Name = "Use under LICX",
@@ -209,18 +212,18 @@ namespace LSTY.Sdtd.WebApi
                 // 可以设置从注释文件加载，但是加载的内容可被 OpenApiTagAttribute 特性覆盖
                 config.UseControllerSummaryAsTagDescription = true;
 
-                config.AddSecurity("ApiKey", new OpenApiSecurityScheme()
-                {
-                    Type = OpenApiSecuritySchemeType.ApiKey,
-                    Scheme = AuthenticationSchemes.ApiKeyAuthenticationSchemeName,
-                    Name = ApiKeyAuthenticationHandler.HttpRequestHeaderName,
-                    In = OpenApiSecurityApiKeyLocation.Header,
-                    Description = "Type into the textbox: {your access-token}."
+                    config.AddSecurity("ApiKey", new OpenApiSecurityScheme()
+                    {
+                        Type = OpenApiSecuritySchemeType.ApiKey,
+                        Scheme = AuthenticationSchemes.ApiKeyAuthenticationSchemeName,
+                        Name = ApiKeyAuthenticationHandler.HttpRequestHeaderName,
+                        In = OpenApiSecurityApiKeyLocation.Header,
+                        Description = "Type into the textbox: {your access-token}."
+                    });
+
+                    config.OperationProcessors.Add(new AspNetCoreOperationFallbackPolicyProcessor("ApiKey"));
                 });
-
-                config.OperationProcessors.Add(new AspNetCoreOperationFallbackPolicyProcessor("ApiKey"));
-            });
-
+            }
             #endregion Swagger文档
 
             #region 适配反向代理
@@ -239,8 +242,8 @@ namespace LSTY.Sdtd.WebApi
             #endregion 适配反向代理
 
             #region 跨域
-
-            if (config.GetSection("EnableCors").Get<bool>())
+            bool enableCors = config.GetSection("EnableCors").Get<bool>();
+            if (enableCors)
             {
                 services.AddCors(options =>
                 {
@@ -277,7 +280,11 @@ namespace LSTY.Sdtd.WebApi
                 await next();
             });
 
-            if (config.GetSection("EnableSwagger").Get<bool>())
+            app.UseWebSockets();
+            app.UseMiddleware<WebSocketMiddleware>();
+
+            bool enableSwagger = config.GetSection("EnableSwagger").Get<bool>();
+            if (enableSwagger)
             {
                 // Register the Swagger generator and the Swagger UI middlewares
                 app.UseOpenApi(config =>
@@ -293,9 +300,9 @@ namespace LSTY.Sdtd.WebApi
             app.UseStaticFiles();
 
             app.UseRouting();
-
             // UseCors 必须在 UseAuthorization 之前在 UseRouting 之后调用
-            if (config.GetSection("EnableCors").Get<bool>())
+            bool enableCors = config.GetSection("EnableCors").Get<bool>();
+            if (enableCors)
             {
                 app.UseCors("Cors");
             }

@@ -14,6 +14,5 @@ namespace LSTY.Sdtd.PatronsMod.Internal
 
         public bool EnableErrorPage { get; set; }
 
-        public bool EnableCors { get; set; }
     }
 }

@@ -36,7 +36,7 @@ namespace LSTY.Sdtd.Services.HubReceivers
 
         private void Subscribe(IModEventHookHub hub)
         {
-            //_hubProxy.On<string>(hub.OnLogCallback);
+            _hubProxy.On<string>(hub.OnLogCallback);
             _hubProxy.On(hub.OnGameAwake);
             _hubProxy.On(hub.OnGameShutdown);
             _hubProxy.On(hub.OnGameStartDone);
