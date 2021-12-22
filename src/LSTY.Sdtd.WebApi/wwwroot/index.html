@@ -4,7 +4,8 @@
 <head>
 	<meta charset="UTF-8" />
 	<!-- import CSS -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.15.7/theme-chalk/index.min.css" />
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	<link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
 	<style>
 		body {
 			width: 100vw;
@@ -36,8 +37,13 @@
 			height: calc(100vh - 216px);
 		}
 
-		.el-main {
+		/* .el-main {
 			padding-right: 2px;
+		} */
+
+		.footer {
+			text-align: center;
+			color: #a0a0a0;
 		}
 	</style>
 </head>
@@ -56,25 +62,25 @@
 						</el-tab-pane>
 					</el-tabs>
 				</el-main>
-				<el-footer height="72px">Footer</el-footer>
+				<el-footer height="72px">
+					<p class="footer">LSTY.Sdtd 6.0 ™ Copyright © 2021 IceCoffee</p>
+				</el-footer>
 			</el-container>
 		</el-container>
 	</div>
 </body>
 <!-- import Vue before Element -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
+<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
 <!-- import JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.15.7/index.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
 <script src="/js/global.js"></script>
 <script>
 	const rootIns = new Vue({
 		el: "#app",
 		data() {
 			return {
-				baseUrl: 'http://localhost:8089/api',
-				accessToken: null,
 				selectedTab: '1',
 				tabPanes: [{
 					name: '1',
@@ -93,11 +99,7 @@
 			};
 		},
 		created() {
-			axios.defaults.baseURL = this.baseUrl;
-			if (!!this.accessToken) {
-				axios.defaults.headers.common['access-token'] = this.accessToken;
-			}
-			axios.get('/ServerManage/LivePlayers/123').then((data) => { console.log(data); });
+			
 		},
 		methods: {
 			addTab(targetName) {

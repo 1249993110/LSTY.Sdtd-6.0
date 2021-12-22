@@ -1,3 +1,5 @@
+top.NProgress.configure({ showSpinner: false });
+
 axios.interceptors.request.use(function (config) {
     top.NProgress.start();
     return config;

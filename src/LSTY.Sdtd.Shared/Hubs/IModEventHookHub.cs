@@ -4,7 +4,7 @@ namespace LSTY.Sdtd.Shared.Hubs
 {
     public interface IModEventHookHub
     {
-        void OnLogCallback(string message);
+        void OnLogCallback(LogEntry logEntry);
 
         void OnGameAwake();
 

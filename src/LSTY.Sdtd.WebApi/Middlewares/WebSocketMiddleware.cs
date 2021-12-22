@@ -1,6 +1,8 @@
 ﻿using IceCoffee.AspNetCore.Authentication;
 using LSTY.Sdtd.Services.Managers;
+using LSTY.Sdtd.Shared.Models;
 using LSTY.Sdtd.WebApi.Models;
+using MessagePack;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -29,7 +31,7 @@ namespace LSTY.Sdtd.WebApi.Middlewares
         {
             public string ConnectionId;
             public WebSocket WebSocket;
-            public string Message;
+            public LogEntry LogEntry;
         }
 
         public WebSocketMiddleware(RequestDelegate next, ILogger<WebSocketMiddleware> logger, IOptions<AppSettings> options, SignalRManager signalRManager)
@@ -41,7 +43,7 @@ namespace LSTY.Sdtd.WebApi.Middlewares
             signalRManager.ModEventHookHub.LogCallback += On_ModEventHookHub_LogCallback;
         }
 
-        private void On_ModEventHookHub_LogCallback(string message)
+        private void On_ModEventHookHub_LogCallback(LogEntry logEntry)
         {
             foreach (var client in _clients)
             {
@@ -54,8 +56,8 @@ namespace LSTY.Sdtd.WebApi.Middlewares
                         Task.Factory.StartNew(SendMessage, new SendLoopEntry() 
                         { 
                             ConnectionId = connectionId, 
-                            WebSocket = webSocket, 
-                            Message = message 
+                            WebSocket = webSocket,
+                            LogEntry = logEntry
                         });
                     }
                     else
@@ -76,9 +78,10 @@ namespace LSTY.Sdtd.WebApi.Middlewares
             var sendLoopEntry = (SendLoopEntry)state;
             try
             {
-                var data = Encoding.UTF8.GetBytes(sendLoopEntry.Message);
+                var data = MessagePackSerializer.Serialize(sendLoopEntry.LogEntry, MessagePack.Resolvers.ContractlessStandardResolver.Options);
+
                 var buffer = new ArraySegment<byte>(data, 0, data.Length);
-                await sendLoopEntry.WebSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                await sendLoopEntry.WebSocket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
             }
             catch (Exception ex)
             {
@@ -167,6 +170,7 @@ namespace LSTY.Sdtd.WebApi.Middlewares
             }
             catch (Exception ex)
             {
+                _clients.TryRemove(connectionId, out var _);
                 _logger.LogError(ex, "Error in WebSocketMiddleware.RecvLoop, Connection Id: " + connectionId);
             }
         }

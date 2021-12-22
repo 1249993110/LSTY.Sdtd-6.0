@@ -1,4 +1,5 @@
-﻿using IceCoffee.AspNetCore.Controllers;
+﻿using IceCoffee.AspNetCore;
+using IceCoffee.AspNetCore.Controllers;
 using IceCoffee.AspNetCore.Models.Primitives;
 using LSTY.Sdtd.Services;
 using LSTY.Sdtd.Services.HubReceivers;
@@ -32,6 +33,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [SucceededResponseType(typeof(IEnumerable<LivePlayer>))]
         public async Task<IResponse> LivePlayers(bool realTime)
         {
             IEnumerable<LivePlayer> data = null;
@@ -52,6 +54,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("{entityId}")]
+        [SucceededResponseType(typeof(LivePlayer))]
         public IResponse LivePlayers(int entityId)
         {
             if(_livePlayers.TryGetPlayer(entityId, out var player))
@@ -60,6 +63,23 @@ namespace LSTY.Sdtd.WebApi.Controllers
             }
 
             return FailedResult($"Player id {entityId} not found");
+        }
+
+        /// <summary>
+        /// 发送命令
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [SucceededResponseType(typeof(LivePlayer))]
+        public async Task<IResponse> ExecuteConsoleCommand(string command, bool inMainThread = false)
+        {
+            if (string.IsNullOrEmpty(command))
+            {
+                return FailedResult("Command can not be empty");
+            }
+
+            var data = await _serverManageHub.ExecuteConsoleCommand(command, inMainThread);
+            return SucceededResult(data);
         }
     }
 }

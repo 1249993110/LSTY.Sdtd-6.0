@@ -26,12 +26,17 @@ namespace LSTY.Sdtd.PatronsMod.Internal
             }
         }
 
-        public static void LogCallback(string message, string trace, LogType type)
+        public static void LogCallback(string message, string trace, UnityEngine.LogType type)
         {
+            LogEntry logEntry = new LogEntry()
+            {
+                Message = message,
+                LogType = (Shared.Models.LogType)type,
+            };
             Task.Factory.StartNew((state) =>
             {
-                _hub.OnLogCallback((string)state);
-            }, message);
+                _hub.OnLogCallback((LogEntry)state);
+            }, logEntry);
         }
 
         public static void GameAwake()
