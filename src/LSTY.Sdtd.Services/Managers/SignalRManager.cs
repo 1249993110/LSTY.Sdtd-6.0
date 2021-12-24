@@ -25,6 +25,8 @@ namespace LSTY.Sdtd.Services.Managers
 
         public event Action Connected;
 
+        public bool IsConnected => _hubConnection.State == ConnectionState.Connected;
+
         public async Task ConnectAsync()
         {
             string signalRUrl = _functionSettings.SignalRUrl;

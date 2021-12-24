@@ -53,10 +53,14 @@ namespace LSTY.Sdtd.PatronsMod
         {
             return await Task.Run(() =>
             {
-                List<LivePlayer> list = new List<LivePlayer>();
+                var list = new List<LivePlayer>();
                 foreach (var client in ConnectionManager.Instance.Clients.List)
                 {
-                    list.Add(client.ToLivePlayer());
+                    var livePlayer = client.ToLivePlayer();
+                    if (livePlayer != null)
+                    {
+                        list.Add(livePlayer);
+                    }
                 }
 
                 return list;
@@ -66,6 +70,14 @@ namespace LSTY.Sdtd.PatronsMod
         public async Task<int> GetLivePlayerCount()
         {
             return await Task.FromResult(GameManager.Instance.World.Players.Count);
+        }
+
+        public async Task<Shared.Models.Inventory> GetLivePlayerInventory(int entityId)
+        {
+            return await Task.Factory.StartNew((state) =>
+            {
+                return ConnectionManager.Instance.Clients.ForEntityId((int)state)?.latestPlayerData.GetInventory();
+            }, entityId);
         }
     }
 }

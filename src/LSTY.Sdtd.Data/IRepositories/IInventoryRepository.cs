@@ -5,6 +5,5 @@ namespace LSTY.Sdtd.Data.IRepositories
 {
     public interface IInventoryRepository : IRepository<T_Inventory>
     {
-        T_Inventory QueryBySteamId(string steamId);
     }
 }

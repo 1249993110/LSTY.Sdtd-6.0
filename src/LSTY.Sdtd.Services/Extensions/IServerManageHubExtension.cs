@@ -15,7 +15,7 @@ namespace LSTY.Sdtd.Services.Extensions
         /// <returns></returns>
         public static Task SendGlobalMessage(this IServerManageHub hub, string message, string senderName)
         {
-            return hub.ExecuteConsoleCommand($"ty-say {message} {senderName}");
+            return hub.ExecuteConsoleCommand($"ty-say \"{message}\" {senderName}");
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace LSTY.Sdtd.Services.Extensions
         /// <returns></returns>
         public static Task SendMessageToPlayer(this IServerManageHub hub, object playerIdOrName, string message, string senderName)
         {
-            return hub.ExecuteConsoleCommand($"ty-pm {playerIdOrName} {message} {senderName}");
+            return hub.ExecuteConsoleCommand($"ty-pm {playerIdOrName} \"{message}\" {senderName}");
         }
 
         #endregion ChatHelper

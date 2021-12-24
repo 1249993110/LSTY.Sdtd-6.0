@@ -20,6 +20,10 @@ CREATE TABLE IF NOT EXISTS T_Player(
 	PlayerKills INTEGER,				--击杀玩家
 	Deaths INTEGER						--死亡次数
 );
+--创建索引
+CREATE INDEX IF NOT EXISTS Index_PlatformUserId ON T_Player(PlatformUserId);
+CREATE INDEX IF NOT EXISTS Index_EntityId ON T_Player(EntityId);
+CREATE INDEX IF NOT EXISTS Index_Name ON T_Player(Name);
 
 --Inventory
 CREATE TABLE IF NOT EXISTS T_Inventory(

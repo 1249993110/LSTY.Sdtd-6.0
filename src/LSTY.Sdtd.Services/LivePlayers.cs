@@ -3,6 +3,7 @@ using LSTY.Sdtd.Services.Managers;
 using LSTY.Sdtd.Shared.Hubs;
 using LSTY.Sdtd.Shared.Models;
 using Microsoft.AspNet.SignalR.Client;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,38 +14,58 @@ namespace LSTY.Sdtd.Services
 {
     public class LivePlayers : ConcurrentDictionary<int, LivePlayer>, ILivePlayers
     {
+        private readonly ILogger<LivePlayers> _logger;
         private readonly IServerManageHub _serverManageHub;
 
         public event Action ServerNonePlayer;
         public event Action ServerHavePlayerAgain;
 
-        public LivePlayers(SignalRManager signalRManager)
+        public LivePlayers(ILogger<LivePlayers> logger, SignalRManager signalRManager)
         {
+            _logger = logger;
+
             _serverManageHub = signalRManager.ServerManageHub;
 
             signalRManager.ModEventHookHub.SavePlayerData += OnSavePlayerData;
             signalRManager.ModEventHookHub.PlayerSpawning += OnPlayerSpawning;
             signalRManager.ModEventHookHub.PlayerDisconnected += OnPlayerDisconnected;
 
-            signalRManager.Connected += OnSignalRManager_Connected;
-            signalRManager.Disconnected += OnSignalRManager_Disconnected;
+            signalRManager.Connected += On_SignalRManager_Connected;
+            signalRManager.Disconnected += On_SignalRManager_Disconnected;
+
+            if (signalRManager.IsConnected)
+            {
+                TryGetLivePlayersFromServer();
+            }
         }
 
-        private void OnSignalRManager_Connected()
+        private void TryGetLivePlayersFromServer()
         {
-            var livePlayers = _serverManageHub.GetLivePlayers().Result;
-            foreach (var livePlayer in livePlayers)
+            try
             {
-                base[livePlayer.EntityId] = livePlayer;
-            }
+                var livePlayers = _serverManageHub.GetLivePlayers().Result;
+                foreach (var livePlayer in livePlayers)
+                {
+                    base[livePlayer.EntityId] = livePlayer;
+                }
 
-            if(livePlayers.Count > 0)
+                if (livePlayers.Count > 0)
+                {
+                    ServerHavePlayerAgain?.Invoke();
+                }
+            }
+            catch (Exception ex)
             {
-                ServerHavePlayerAgain?.Invoke();
+                _logger.LogError(ex, "Error in LivePlayers.TryGetLivePlayersFromServer");
             }
         }
 
-        private void OnSignalRManager_Disconnected()
+        private void On_SignalRManager_Connected()
+        {
+            TryGetLivePlayersFromServer();
+        }
+
+        private void On_SignalRManager_Disconnected()
         {
             base.Clear();
             ServerNonePlayer?.Invoke();
@@ -84,6 +105,11 @@ namespace LSTY.Sdtd.Services
             }
 
             return true;
+        }
+
+        public bool ContainsPlayer(int entityId)
+        {
+            return base.ContainsKey(entityId);
         }
 
         private void OnPlayerDisconnected(int entityId)

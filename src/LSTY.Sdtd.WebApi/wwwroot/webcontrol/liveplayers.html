@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <template>
+            <el-table :data="tableData" border style="width: 100%" :height="tableHeight" highlight-current-row
+                ref="table" @row-contextmenu="onContextmenu">
+                <el-table-column type="index" width="50">
+                </el-table-column>
+                <el-table-column prop="entityId" label="实体Id" width="100">
+                </el-table-column>
+                <el-table-column prop="name" label="玩家昵称" width="160">
+                </el-table-column>
+                <el-table-column prop="platformUserId" label="平台Id" width="170">
+                </el-table-column>
+                <el-table-column prop="platformType" label="平台类型" width="80">
+                </el-table-column>
+                <el-table-column prop="currentLife" label="存活时长" width="100" :formatter="format_currentLife">
+                </el-table-column>
+                <el-table-column prop="totalPlayTime" label="总游戏时长" width="100" :formatter="format_totalPlayTime">
+                </el-table-column>
+                <el-table-column prop="level" label="等级" width="60">
+                </el-table-column>
+                <el-table-column prop="lastPosition" label="玩家坐标" width="130" :formatter="format_lastPosition">
+                </el-table-column>
+                <el-table-column prop="zombieKills" label="击杀僵尸" width="80">
+                </el-table-column>
+                <el-table-column prop="playerKills" label="击杀玩家" width="80">
+                </el-table-column>
+                <el-table-column prop="deaths" label="死亡次数" width="80">
+                </el-table-column>
+                <el-table-column prop="expToNextLevel" label="升级所需经验" width="110">
+                </el-table-column>
+                <el-table-column prop="ip" label="IP地址" width="130">
+                </el-table-column>
+                <el-table-column prop="ping" label="延迟" width="60">
+                </el-table-column>
+                <el-table-column prop="landProtectionActive" label="领地石保护状态" :formatter="format_landProtectionActive">
+                </el-table-column>
+                <el-table-column prop="landProtectionMultiplier" label="领地石保护倍数">
+                </el-table-column>
+            </el-table>
+        </template>
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script crossorigin src="https://unpkg.com/@msgpack/msgpack"></script>
+<script src="https://unpkg.com/vue-contextmenujs/dist/contextmenu.umd.js"></script>
+<script src="/js/global.js"></script>
+<script src="/js/api.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            return {
+                tableHeight: document.body.clientHeight,
+                tableData: [],
+                timer: null
+            };
+        },
+        created() {
+            this.getLivePlayers();
+            this.timer = setInterval(this.getLivePlayers, 10000);
+            window.onresize = () => {
+                this.tableHeight = document.body.clientHeight;
+            };
+        },
+        methods: {
+            formatMinute(totalMinute) {
+                const day = parseInt(totalMinute / 60 / 24);
+                const hour = parseInt(totalMinute / 60 % 24);
+                const minute = parseInt(totalMinute % 60);
+                let result = '';
+                if (day > 0) {
+                    result = day + ' 天 ';
+                }
+                if (hour > 0) {
+                    result += hour + ' 小时 ';
+                }
+                if (minute > 0) {
+                    result += minute + ' 分钟 ';
+                }
+                return result;
+            },
+            getLivePlayers() {
+                api.getLivePlayers().then((response) => {
+                    this.tableData = response.data.data;
+                });
+            },
+            onContextmenu(row, column, event) {
+                event.preventDefault();
+                this.$refs.table.setCurrentRow(row);
+                this.$contextmenu({
+                    items: [
+                        {
+                            label: "查看背包",
+                            onClick: () => {
+                                console.log("返回(B)");
+                            },
+                            icon: 'el-icon-view',
+                            divided: true
+                        },
+                        {
+                            label: "复制",
+                            children: [
+                                {
+                                    label: "复制玩家实体Id",
+                                    onClick: () => {
+                                        navigator.clipboard.writeText(row.name).then(() => { top.Vue.prototype.$message.success('复制成功'); });
+                                    }
+                                },
+                                {
+                                    label: "复制玩家平台Id",
+                                    onClick: () => {
+                                        navigator.clipboard.writeText(row.entityId).then(() => { top.Vue.prototype.$message.success('复制成功'); });
+                                    }
+                                },
+                                {
+                                    label: "复制玩家坐标",
+                                    onClick: () => {
+                                        navigator.clipboard.writeText(this.format_lastPosition(row)).then(() => { top.Vue.prototype.$message.success('复制成功'); });
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            label: "给予物品",
+                            onClick: () => {
+                                api.giveItem();
+                            },
+                        },
+                        {
+                            label: "生成实体",
+                            onClick: () => {
+                                api.spawnEntity();
+                            },
+                        },
+                        {
+                            label: "传送玩家",
+                            onClick: () => {
+                                api.telePlayer();
+                            },
+                            icon: 'el-icon-map-location',
+                            divided: true
+                        },
+                        {
+                            label: "踢出玩家",
+                            onClick: () => {
+                                api.kickPlayer();
+                            },
+                        },
+                        {
+                            label: "封禁玩家",
+                            onClick: () => {
+                                api.banPlayer();
+                            },
+                            divided: true
+                        },
+                        {
+                            label: "发送私聊消息",
+                            onClick: () => {
+                                api.sendMessageToPlayer();
+                            },
+                            icon: 'el-icon-message',
+                        },
+                        {
+                            label: "设置为超级管理员",
+                            onClick: () => {
+                                api.addAdmin();
+                            },
+                        },
+                    ],
+                    event,
+                    minWidth: 230
+                });
+            },
+            format_currentLife(row) {
+                const value = row.currentLife;
+                return this.formatMinute(value);
+            },
+            format_totalPlayTime(row) {
+                const value = row.totalPlayTime;
+                return this.formatMinute(value);
+            },
+            format_lastPosition(row) {
+                const value = row.lastPosition;
+                return `${value.x} ${value.y} ${value.z}`;
+            },
+            format_landProtectionActive(row) {
+                const value = row.landProtectionActive;
+                return value ? '激活' : '未激活';
+            }
+        },
+        beforeDestroy() {
+            clearInterval(this.timer);
+        },
+    });
+</script>
+
+</html>

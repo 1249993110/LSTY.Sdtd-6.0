@@ -37,13 +37,15 @@
 <body>
     <div id="app">
         <div id="content"></div>
-        <div style="margin-top: 10px;">
-            <div style="display: inline-block; width: calc(100% - 103px);">
-                <el-input placeholder="请输入内容" v-model="command" clearable @keyup.enter.native="sendCommand">
-                </el-input>
+        <template>
+            <div style="margin-top: 10px;">
+                <div style="display: inline-block; width: calc(100% - 103px);">
+                    <el-input placeholder="请输入内容" v-model="command" clearable @keyup.enter.native="sendCommand">
+                    </el-input>
+                </div>
+                <el-button type="primary" @click="sendCommand">发送命令</el-button>
             </div>
-            <el-button type="primary" @click="sendCommand">发送命令</el-button>
-        </div>
+        </template>
     </div>
 </body>
 <!-- import Vue before Element -->
@@ -52,6 +54,7 @@
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script crossorigin src="https://unpkg.com/@msgpack/msgpack"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
 <script src="/js/global.js"></script>
 <script src="/js/api.js"></script>
 <script>
@@ -64,36 +67,41 @@
                 logMaxCount: 1000,
                 connection: null,
                 command: '',
+                timer: null,
             };
         },
         created() {
-            this.init();
+            this.initWebsocket();
         },
         methods: {
-            init() {
+            initWebsocket() {
+                this.outputLog('Connecting websocket server...', 3, true);
                 var connection = new WebSocket(this.websocketPath);
                 connection.binaryType = 'arraybuffer';
-                connection.onopen = function () {
-                    console.log("open");
+                connection.onopen = () => {
+                    this.outputLog('Websocket connection started', 3, true);
                 }
                 connection.onmessage = (e) => {
                     const logEntry = MessagePack.decode(e.data);
                     //console.log(logEntry);
-                    this.outputLog({
-                        logType: logEntry.LogType,
-                        message: logEntry.Message
-                    });
+                    this.outputLog(logEntry.Message, logEntry.LogType);
                 }
-                connection.onclose = function (e) {
-                    console.log("close");
+                connection.onclose = (e) => {
+                    this.outputLog('Websocket connection closed, prepare to try reconnect', 3, true);
+                    this.startTimer();
                 }
-                connection.onerror = function (e) {
-                    console.log(e);
+                connection.onerror = (e) => {
+                    //console.log(e);
+                    this.outputLog('Error in websocket connection', 0, true);
                 }
 
                 this.connection = connection;
             },
-            outputLog(logEntry) {
+            outputLog(message, logType = 3, addDatetime = false) {
+                if (addDatetime) {
+                    message = moment().format('YYYY-MM-DDTHH:mm:ss ') + message;
+                }
+
                 const element = document.getElementById('content');
 
                 if (this.logCount > this.logMaxCount) {
@@ -104,7 +112,7 @@
                 }
 
                 let color;
-                switch (logEntry.logType) {
+                switch (logType) {
                     // Error
                     case 0:
                         color = 'red';
@@ -126,27 +134,32 @@
                         color = 'red';
                         break;
                     default:
-                        alert('Undefined LogType!')
+                        color = '#00C814';
                 }
 
                 const p = document.createElement("p");
-                p.innerHTML = `<font color="${color}">${logEntry.message}</font>`;
+                p.innerHTML = `<font color="${color}">${message}</font>`;
 
                 element.appendChild(p);
                 p.scrollIntoView();
             },
             sendCommand() {
-                api.executeConsoleCommand(this.command).then((response) => {
-                    response.data.data.forEach(element => {
-                        this.outputLog({
-                            logType: 1,
-                            message: element
-                        });
+                api.sendConsoleCommand(this.command).then((response) => {
+                    response.data.data.forEach(item => {
+                        this.outputLog(item, 1);
                     });
                 });
-            }
+            },
+            startTimer() {
+                if (this.timer) {
+                    clearTimeout(this.timer);
+                }
+                this.timer = setTimeout(this.initWebsocket, 5000); // 注意: 第一个参数为方法名的时候不要加括号;
+            },
         },
-
+        beforeDestroy() {
+            clearTimeout(this.timer);
+        },
     });
 </script>
 

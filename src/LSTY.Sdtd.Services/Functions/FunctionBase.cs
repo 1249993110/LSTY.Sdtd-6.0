@@ -11,10 +11,11 @@ namespace LSTY.Sdtd.Services.Functions
 {
     public abstract class FunctionBase
     {
-        private string _functionName;
+        private readonly string _functionName;
         private bool _isEnabled;
         private bool _isRunning;
         public string FunctionName => _functionName;
+        public bool IsRunning => _isRunning;
 
         public bool IsEnabled
         {
@@ -81,7 +82,7 @@ namespace LSTY.Sdtd.Services.Functions
                 if (_isRunning)
                 {
                     _isRunning = false;
-                    DisableFunction();
+                    OnDisableFunction();
                 }
             }
         }
@@ -96,36 +97,36 @@ namespace LSTY.Sdtd.Services.Functions
                 // If the function is not running
                 if (_isRunning == false && _isEnabled)
                 {
-                    _isRunning = EnableFunctionNonePlayer();
+                    _isRunning = OnEnableFunctionNonePlayer();
 
                     // only there are players on the server
                     if (LivePlayers.IsEmpty == false)
                     {
                         _isRunning = true;
-                        EnableFunction();
+                        OnEnableFunction();
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Disabled function, the default implementation ChatHook of the base class
+        /// Disabled function
         /// </summary>
-        protected virtual void DisableFunction()
+        protected virtual void OnDisableFunction()
         {
         }
 
         /// <summary>
-        /// Enabled function, the default implementation ChatHook of the base class
+        /// Enabled function
         /// </summary>
-        protected virtual void EnableFunction()
+        protected virtual void OnEnableFunction()
         {
         }
 
         /// <summary>
         /// Enabled function, 无论服务器上是否有玩家, 返回值将设置到 _isRunning
         /// </summary>
-        protected virtual bool EnableFunctionNonePlayer()
+        protected virtual bool OnEnableFunctionNonePlayer()
         {
             return false;
         }

@@ -10,6 +10,12 @@ using System.Collections.Concurrent;
 
 namespace LSTY.Sdtd.Services.HubReceivers
 {
+    /// <summary>
+    /// 为避免死锁，应将Receiver结果分派给其他线程
+    /// </summary>
+    /// <remarks>
+    /// https://github.com/SignalR/SignalR/issues/3895
+    /// </remarks>
     public class ModEventHookHubReceiver : IModEventHookHub
     {
         private IHubProxy _hubProxy;
@@ -52,56 +58,89 @@ namespace LSTY.Sdtd.Services.HubReceivers
 
         void IModEventHookHub.OnLogCallback(LogEntry logEntry)
         {
-            LogCallback?.Invoke(logEntry);
+            if(LogCallback != null)
+            {
+                Task.Run(() => LogCallback.Invoke(logEntry));
+            }
         }
 
         void IModEventHookHub.OnGameAwake()
         {
-            GameAwake?.Invoke();
+            if (GameAwake != null)
+            {
+                Task.Run(GameAwake.Invoke);
+            }
         }
 
         void IModEventHookHub.OnGameShutdown()
         {
-            GameShutdown?.Invoke();
+            if (GameShutdown != null)
+            {
+                Task.Run(GameShutdown.Invoke);
+            }
         }
 
         void IModEventHookHub.OnGameStartDone()
         {
-            GameStartDone?.Invoke();
+            if (GameStartDone != null)
+            {
+                Task.Run(GameStartDone.Invoke);
+            }
         }
 
         void IModEventHookHub.OnEntitySpawned(Entity entity)
         {
-            EntitySpawned?.Invoke(entity);
+            if (EntitySpawned != null)
+            {
+                Task.Run(() => EntitySpawned.Invoke(entity));
+            }
         }
         void IModEventHookHub.OnChatMessage(ChatMessage chatMessage)
         {
-            ChatMessage?.Invoke(chatMessage);
+            if (ChatMessage != null)
+            {
+                Task.Run(() => ChatMessage.Invoke(chatMessage));
+            }
         }
 
         void IModEventHookHub.OnPlayerDisconnected(int entityId)
         {
-            PlayerDisconnected?.Invoke(entityId);
+            if (PlayerDisconnected != null)
+            {
+                Task.Run(() => PlayerDisconnected.Invoke(entityId));
+            }
         }
 
         void IModEventHookHub.OnSavePlayerData(LivePlayer livePlayer)
         {
-            SavePlayerData?.Invoke(livePlayer);
+            if (SavePlayerData != null)
+            {
+                Task.Run(() => SavePlayerData.Invoke(livePlayer));
+            }
         }
 
         void IModEventHookHub.OnPlayerSpawning(LivePlayer livePlayer)
         {
-            PlayerSpawning?.Invoke(livePlayer);
+            if (PlayerSpawning != null)
+            {
+                Task.Run(() => PlayerSpawning.Invoke(livePlayer));
+            }
         }
 
         void IModEventHookHub.OnPlayerSpawnedInWorld(PlayerSpawnedEventArgs playerSpawnedEventArgs)
         {
-            PlayerSpawnedInWorld?.Invoke(playerSpawnedEventArgs);
+            if (PlayerSpawnedInWorld != null)
+            {
+                Task.Run(() => PlayerSpawnedInWorld.Invoke(playerSpawnedEventArgs));
+            }
         }
 
         void IModEventHookHub.OnEntityKilled(Entity entity, int entityIdThatKilledMe)
         {
-            EntityKilled?.Invoke(entity, entityIdThatKilledMe);
+            if (EntityKilled != null)
+            {
+                Task.Run(() => EntityKilled.Invoke(entity, entityIdThatKilledMe));
+            }
         }
     }
 }

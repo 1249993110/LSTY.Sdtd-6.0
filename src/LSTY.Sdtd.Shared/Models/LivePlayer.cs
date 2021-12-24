@@ -21,7 +21,5 @@ namespace LSTY.Sdtd.Shared.Models
         public bool LandProtectionActive { get; set; }
 
         public float LandProtectionMultiplier { get; set; }
-
-        public Inventory Inventory { get; set; }
     }
 }

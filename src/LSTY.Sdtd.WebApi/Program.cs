@@ -193,21 +193,21 @@ namespace LSTY.Sdtd.WebApi
                     config.PostProcess = document =>
                     {
                         document.Info.Version = "v1";
-                        document.Info.Title = "顺德AQI接口";
-                        document.Info.Description = "A simple ASP.NET Core web API";
-                        document.Info.TermsOfService = "https://hycx-gd.cn";
+                        document.Info.Title = "LSTY.Sdtd API Documentation";
+                        document.Info.Description = "LSTY.Sdtd is a web based server manager for 7 Days to die";
+                        document.Info.TermsOfService = "https://7daystodie.top";
                         document.Info.Contact = new OpenApiContact()
                         {
-                            Name = "华云创信（广东）生态环境科技有限公司",
-                            Email = "hycx2019@ciestgd.com",
-                            Url = "https://hycx-gd.cn"
+                            Name = "洛水天依",
+                            Email = "1249993110@qq.com",
+                            Url = "https://github.com/1249993110"
                         };
-                    //document.Info.License = new OpenApiLicense
-                    //{
-                    //    Name = "Use under LICX",
-                    //    Url = "https://github.com/1249993110"
-                    //};
-                };
+                        document.Info.License = new OpenApiLicense
+                        {
+                            Name = "LICENSE",
+                            Url = "https://github.com/1249993110/TianYiSdtdServerTools/blob/master/LICENSE"
+                        };
+                    };
 
                 // 可以设置从注释文件加载，但是加载的内容可被 OpenApiTagAttribute 特性覆盖
                 config.UseControllerSummaryAsTagDescription = true;

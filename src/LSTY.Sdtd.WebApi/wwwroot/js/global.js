@@ -10,14 +10,18 @@ axios.interceptors.response.use(function (response) {
     return response;
 }, function (error) {
     top.NProgress.done();
-    var result = error.response.data;
-    switch (result.code) {
-        case 400:
-        case 500:
-            Vue.prototype.$message.error(result.message);
-            break;
-        default:
-            Vue.prototype.$message.error(error.toJSON());
+    if (error.response) {
+        var result = error.response.data;
+        switch (result.code) {
+            case 400:
+            case 500:
+                top.Vue.prototype.$message.error(result.message);
+                break;
+            default:
+                top.Vue.prototype.$message.error(error.toJSON());
+        }
+    } else {
+        top.Vue.prototype.$message.error(error.toJSON());
     }
 
     return Promise.reject(error);

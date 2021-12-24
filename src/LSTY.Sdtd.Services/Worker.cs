@@ -17,13 +17,13 @@ namespace LSTY.Sdtd.Services
     {
         private readonly ILogger<Worker> _logger;
         private readonly SignalRManager _signalRManager;
-        private readonly FunctionFactory _functionManager;
+        private readonly FunctionFactory _functionFactory;
 
-        public Worker(ILogger<Worker> logger, SignalRManager signalRManager, FunctionFactory functionManager)
+        public Worker(ILogger<Worker> logger, SignalRManager signalRManager, FunctionFactory functionFactory)
         {
             _logger = logger;
             _signalRManager = signalRManager;
-            _functionManager = functionManager;
+            _functionFactory = functionFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,7 +36,9 @@ namespace LSTY.Sdtd.Services
                     await _signalRManager.ConnectAsync();
 
                     // 初始化功能
-                    _functionManager.Initialize();
+                    _functionFactory.Initialize();
+
+                    GlobalTimer.Start();
                 }
             }
             catch (Exception ex)

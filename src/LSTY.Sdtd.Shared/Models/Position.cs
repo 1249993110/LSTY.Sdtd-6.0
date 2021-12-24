@@ -1,11 +1,15 @@
 ﻿
 namespace LSTY.Sdtd.Shared.Models
 {
-    public struct Position
+    public class Position
     {
-        public int X;
-        public int Y;
-        public int Z;
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+
+        public Position()
+        {
+        }
 
         public Position(int x, int y, int z)
         {

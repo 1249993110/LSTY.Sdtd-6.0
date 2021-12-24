@@ -25,6 +25,8 @@ namespace LSTY.Sdtd.Services
 
         int Count { get; }
 
+        bool ContainsPlayer(int entityId);
+
         event Action ServerNonePlayer;
 
         event Action ServerHavePlayerAgain;

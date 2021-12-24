@@ -14,5 +14,7 @@ namespace LSTY.Sdtd.Shared.Hubs
         Task<List<LivePlayer>> GetLivePlayers();
 
         Task<int> GetLivePlayerCount();
+
+        Task<Inventory> GetLivePlayerInventory(int entityId);
     }
 }

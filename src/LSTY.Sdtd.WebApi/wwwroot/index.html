@@ -23,8 +23,8 @@
 			height: 100%;
 		}
 
-		.el-aside {
-			background-color: rgb(0, 21, 41);
+		.navmenuContainer {
+			height: 100%;
 		}
 
 		iframe {
@@ -41,6 +41,16 @@
 			padding-right: 2px;
 		} */
 
+		.header {
+			color: #1890ff;
+			font-weight: 600;
+			font-size: 20px;
+			font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+			text-align: center;
+			line-height: 48px;
+			padding-top: 10px;
+		}
+
 		.footer {
 			text-align: center;
 			color: #a0a0a0;
@@ -50,23 +60,33 @@
 
 <body>
 	<div id="app">
-		<el-container>
-			<el-aside width="210px">Aside</el-aside>
+		<template>
 			<el-container>
-				<el-header height="48px">Header</el-header>
-				<el-main>
-					<el-tabs v-model="selectedTab" type="card" closable @tab-remove="removeTab">
-						<el-tab-pane v-for="(item, index) in tabPanes" :key="index" :label="item.title"
-							:name="item.name">
-							<iframe :src="item.url"></iframe>
-						</el-tab-pane>
-					</el-tabs>
-				</el-main>
-				<el-footer height="72px">
-					<p class="footer">LSTY.Sdtd 6.0 ™ Copyright © 2021 IceCoffee</p>
-				</el-footer>
+				<el-aside width="210px">
+					<el-menu :default-active="selectedMenu" class="navmenuContainer" @select="handleSelectMenu"
+						background-color="#001529" text-color="#fff" active-text-color="#ffd04b">
+						<el-menu-item v-for="(item, index) in menus" :index="item.name">
+							<i :class="item.icon"></i>
+							<span slot="title">{{item.title}}</span>
+						</el-menu-item>
+					</el-menu>
+				</el-aside>
+				<el-container>
+					<el-header height="48px" class="header">天依七日杀服务器管理系统</el-header>
+					<el-main>
+						<el-tabs v-model="selectedTab" type="card" closable @tab-remove="removeTab">
+							<el-tab-pane v-for="(item, index) in tabPanes" :key="index" :label="item.title"
+								:name="item.name">
+								<iframe :src="item.url"></iframe>
+							</el-tab-pane>
+						</el-tabs>
+					</el-main>
+					<el-footer height="72px">
+						<p class="footer">LSTY.Sdtd 6.0 ™ Copyright © 2021 IceCoffee</p>
+					</el-footer>
+				</el-container>
 			</el-container>
-		</el-container>
+		</template>
 	</div>
 </body>
 <!-- import Vue before Element -->
@@ -81,53 +101,67 @@
 		el: "#app",
 		data() {
 			return {
-				selectedTab: '1',
-				tabPanes: [{
-					name: '1',
+				selectedTab: '',
+				selectedMenu: 'console',
+				menus: [{
+					name: 'console',
 					title: '控制台',
-					url: '/webcontrol/console.html'
+					url: '/webcontrol/console.html',
+					icon: 'el-icon-loading'
 				}, {
-					name: '2',
+					name: 'liveplayers',
 					title: '在线玩家',
-					url: '/webcontrol/liveplayers.html'
+					url: '/webcontrol/liveplayers.html',
+					icon: 'el-icon-user'
 				}, {
-					name: '3',
+					name: 'api-document',
 					title: '接口文档',
-					url: '/api/swagger/index.html'
+					url: '/api/swagger/index.html',
+					icon: 'el-icon-document',
+					externalLink: true
 				}],
-
+				tabPanes: [],
 			};
 		},
 		created() {
-			
+			this.addTab('console');
 		},
 		methods: {
-			addTab(targetName) {
-				// let newTabName = ++this.tabIndex + '';
-				// this.tabPanes.push({
-				//     title: 'New Tab',
-				//     name: newTabName,
-				//     content: 'New Tab content'
-				// });
-				// this.selectedTab = newTabName;
+			addTab(menuName) {
+				const menu = this.menus.find(item => item.name === menuName);
+
+				if (menu.externalLink) {
+					window.open(window.origin + menu.url);
+				} else {
+					this.tabPanes.push(menu);
+					this.selectedTab = menuName;
+				}
 			},
 			removeTab(targetName) {
-				// let tabs = this.tabPanes;
-				// let activeName = this.selectedTab;
-				// if (activeName === targetName) {
-				//     tabs.forEach((tab, index) => {
-				//         if (tab.name === targetName) {
-				//             let nextTab = tabs[index + 1] || tabs[index - 1];
-				//             if (nextTab) {
-				//                 activeName = nextTab.name;
-				//             }
-				//         }
-				//     });
-				// }
+				let tabs = this.tabPanes;
+				let activeName = this.selectedTab;
+				if (activeName === targetName) {
+					tabs.forEach((tab, index) => {
+						if (tab.name === targetName) {
+							let nextTab = tabs[index + 1] || tabs[index - 1];
+							if (nextTab) {
+								activeName = nextTab.name;
+							}
+						}
+					});
+				}
 
-				// this.selectedTab = activeName;
-				// this.tabPanes = tabs.filter(tab => tab.name !== targetName);
+				this.selectedTab = activeName;
+				this.tabPanes = tabs.filter(tab => tab.name !== targetName);
+			},
+			handleSelectMenu(menuName) {
+				if (this.tabPanes.find(item => item.name === menuName)) {
+					this.selectedTab = menuName;
+				} else {
+					this.addTab(menuName);
+				}
 			}
+
 		},
 	});
 </script>

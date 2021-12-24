@@ -119,7 +119,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
-	<PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<PostBuildEvent>
 			cd /D "H:\steam\steamapps\common\7 Days to Die Dedicated Server"
 			powershell start-process -FilePath startdedicated.bat

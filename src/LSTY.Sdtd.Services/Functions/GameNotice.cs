@@ -10,18 +10,20 @@ namespace LSTY.Sdtd.Services.Functions
     public class GameNotice : FunctionBase
     {
         private readonly SubTimer _timer;
-        private readonly GameNoticeSettings _settings;
+        private GameNoticeSettings _settings;
 
         public GameNotice(ILoggerFactory loggerFactory, IOptionsMonitor<FunctionSettings> optionsMonitor, SignalRManager signalRManager, ILivePlayers livePlayers)
             : base(loggerFactory, optionsMonitor, signalRManager, livePlayers)
         {
-            _settings = FunctionSettings.GameNoticeSettings;
-            _timer = new SubTimer(SendAlternateNotice, _settings.AlternateInterval);
+            _timer = new SubTimer(SendAlternateNotice);
+            OnSettingsChanged(FunctionSettings);
         }
 
         protected override void OnSettingsChanged(FunctionSettings settings)
         {
-            _timer.Interval = settings.GameNoticeSettings.AlternateInterval;
+            _settings = settings.GameNoticeSettings;
+            base.IsEnabled = _settings.IsEnabled;
+            _timer.Interval = _settings.AlternateInterval;
         }
 
         private void SendAlternateNotice()
@@ -35,14 +37,14 @@ namespace LSTY.Sdtd.Services.Functions
             }
         }
 
-        protected override void DisableFunction()
+        protected override void OnDisableFunction()
         {
             _timer.IsEnabled = false;
             GlobalTimer.UnregisterSubTimer(_timer);
             ModEventHookHub.PlayerSpawnedInWorld -= PlayerSpawnedInWorld;
         }
 
-        protected override void EnableFunction()
+        protected override void OnEnableFunction()
         {
             _timer.IsEnabled = true;
             GlobalTimer.RegisterSubTimer(_timer);

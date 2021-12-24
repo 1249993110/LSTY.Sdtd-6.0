@@ -32,5 +32,10 @@ namespace LSTY.Sdtd.Services.HubReceivers
         {
             return _hubProxy.Invoke<int>(nameof(IServerManageHub.GetLivePlayerCount));
         }
+
+        public Task<Inventory> GetLivePlayerInventory(int entityId)
+        {
+            return _hubProxy.Invoke<Inventory>(nameof(IServerManageHub.GetLivePlayerInventory));
+        }
     }
 }
