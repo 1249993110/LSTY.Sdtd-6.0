@@ -18,9 +18,10 @@
         }
 
         #content {
-            background-color: rgb(30, 30, 30);
+            background-color: white;
             height: calc(100% - 60px);
             overflow: auto;
+            border: 1px solid darkcyan;
             padding: 1px;
         }
 
@@ -40,10 +41,10 @@
         <template>
             <div style="margin-top: 10px;">
                 <div style="display: inline-block; width: calc(100% - 103px);">
-                    <el-input placeholder="请输入内容" v-model="command" clearable @keyup.enter.native="sendCommand">
+                    <el-input placeholder="请输入内容" v-model="message" clearable @keyup.enter.native="sendMessage">
                     </el-input>
                 </div>
-                <el-button type="primary" @click="sendCommand">发送命令</el-button>
+                <el-button type="primary" @click="sendMessage">发送消息</el-button>
             </div>
         </template>
     </div>
@@ -64,39 +65,20 @@
             return {
                 contentCount: 0,
                 contentMaxCount: 1000,
-                command: '',
+                message: '',
             };
         },
         created() {
-            top.Vue.prototype.$EventBus.$on('on_webSocket_connecting', () => {
-                this.outputLog('Connecting webSocket server...', 3, true);
-            });
-
-            top.Vue.prototype.$EventBus.$on('on_webSocket_open', () => {
-                this.outputLog('WebSocket connection started', 3, true);
-            });
-
-            top.Vue.prototype.$EventBus.$on('on_webSocket_close', () => {
-                this.outputLog('WebSocket connection closed, prepare to try reconnect', 3, true);
-            });
-
-            top.Vue.prototype.$EventBus.$on('on_webSocket_connecting', () => {
-                this.outputLog('Error in webSocket connection', 0, true);
-            });
-
-            top.Vue.prototype.$EventBus.$on('on_consoleLog', (logEntry) => {
-                //console.log(logEntry)
-                this.outputLog(logEntry.message, logEntry.logType);
+            top.Vue.prototype.$EventBus.$on('on_chatMessage', (chatMessage) => {
+                //console.log(chatMessage)
+                this.outputChatMessage(chatMessage);
             });
         },
         methods: {
-            outputLog(message, logType = 3, addDatetime = false) {
-                if (addDatetime) {
-                    message = moment().format('YYYY-MM-DDTHH:mm:ss ') + message;
-                }
+            outputChatMessage(chatMessage) {
+                const message = moment().format('YYYY-MM-DD HH:mm:ss   \'') + chatMessage.senderName + '\': ' + chatMessage.message;
 
                 const element = document.getElementById('content');
-
                 if (this.contentCount > this.contentMaxCount) {
                     element.removeChild(element.firstElementChild);
                 }
@@ -105,29 +87,29 @@
                 }
 
                 let color;
-                switch (logType) {
-                    // Error
+                switch (chatMessage.chatType) {
+                    // Global
                     case 0:
-                        color = 'red';
+                        color = 'black';
                         break;
-                    // Assert
+                    // Friends
                     case 1:
                         color = '#006400';
                         break;
-                    // Warning
+                    // Party
                     case 2:
-                        color = 'yellow';
+                        color = '#FFD700';
                         break;
-                    // Log
+                    // Whisper
                     case 3:
                         color = '#00C814';
                         break;
-                    // Exception
-                    case 4:
-                        color = 'red';
-                        break;
                     default:
-                        color = '#00C814';
+                        color = 'black';
+                }
+
+                if(chatMessage.entityId === -1){
+                    color = 'red';
                 }
 
                 const p = document.createElement("p");
@@ -136,14 +118,9 @@
                 element.appendChild(p);
                 p.scrollIntoView();
             },
-            sendCommand() {
-                api.sendConsoleCommand(this.command).then((response) => {
-                    response.data.data.forEach(item => {
-                        this.outputLog(item, 1);
-                    });
-                });
-            },
-
+            sendMessage() {
+                api.sendGlobalMessage(this.message);
+            }
         }
     });
 </script>

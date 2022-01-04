@@ -1,7 +1,6 @@
-const accessToken = '';
-axios.defaults.baseURL = 'http://localhost:8089/api';
-if (!!accessToken) {
-    axios.defaults.headers.common['access-token'] = accessToken;
+axios.defaults.baseURL = 'http://' + window.location.host + '/api';
+if (!!top.accessToken) {
+    axios.defaults.headers.common['access-token'] = top.accessToken;
 }
 
 const api = {};
@@ -15,28 +14,28 @@ api.sendConsoleCommand = function (command, inMainThread = false) {
     });
 }
 
-api.sendGlobalMessage = function (message, senderName) {
-    return api.executeConsoleCommand(`ty-say \"${message}\" ${senderName}`);
+api.sendGlobalMessage = function (message, senderName = 'Server') {
+    return api.sendConsoleCommand(`ty-say \"${message}\" ${senderName}`);
 }
 
-api.sendMessageToPlayer = function (playerIdOrName, message, senderName) {
-    return api.executeConsoleCommand(`ty-pm ${playerIdOrName} \"${message}\" ${senderName}`);
+api.sendMessageToPlayer = function (playerIdOrName, message, senderName = 'Server') {
+    return api.sendConsoleCommand(`ty-pm ${playerIdOrName} \"${message}\" ${senderName}`);
 }
 
-api.telePlayer = function (playerIdOrName, targetId) {
-    return api.executeConsoleCommand(`tele ${playerIdOrName} ${targetId}`);
+api.telePlayer = function (playerIdOrName, target) {
+    return api.sendConsoleCommand(`tele ${playerIdOrName} ${target}`);
 }
 
 api.giveItem = function (playerIdOrName, itemName, count, quality = 0, durability = 0) {
-    return api.executeConsoleCommand(`ty-gi ${playerIdOrName} ${itemName} ${count} ${quality} ${durability}`);
+    return api.sendConsoleCommand(`ty-gi ${playerIdOrName} ${itemName} ${count} ${quality} ${durability}`);
 }
 
 api.spawnEntity = function (playerNameOrEntityId, spawnEntityIdOrName) {
-    return api.executeConsoleCommand(`se ${playerNameOrEntityId} ${spawnEntityIdOrName}`);
+    return api.sendConsoleCommand(`se ${playerNameOrEntityId} ${spawnEntityIdOrName}`);
 }
 
 api.kickPlayer = function (playerIdOrName) {
-    return api.executeConsoleCommand(`kick ${playerIdOrName}`);
+    return api.sendConsoleCommand(`kick ${playerIdOrName}`);
 }
 
 /** 
@@ -45,21 +44,31 @@ api.kickPlayer = function (playerIdOrName) {
  * @durationUnit minute(s), hour(s), day(s), week(s), month(s), year(s)
  */
 api.banPlayer = function (playerIdOrName, duration, durationUnit, reason, displayName) {
-    return api.executeConsoleCommand(`ban add ${playerIdOrName} ${duration} ${durationUnit} ${reason} ${displayName}`);
+    return api.sendConsoleCommand(`ban add ${playerIdOrName} ${duration} ${durationUnit} ${reason} ${displayName}`);
 }
 
 api.addAdmin = function (playerIdOrName, level, displayName) {
-    return api.executeConsoleCommand(`admin add ${playerIdOrName} ${level} ${displayName}`);
+    return api.sendConsoleCommand(`admin add ${playerIdOrName} ${level} ${displayName}`);
 }
 
-api.getLivePlayers = function () {
-    return axios.get('/ServerManage/LivePlayers');
+api.getLivePlayers = function (realTime = false) {
+    return axios.get('/Players/LivePlayers' + (realTime ? '?realTime=true' : ''));
 }
 
-api.getLivePlayer = function (playerEntityId) {
-    return axios.get('/ServerManage/LivePlayers/' + playerEntityId);
+api.getLivePlayer = function (playerEntityId, realTime = false) {
+    return axios.get('/Players/LivePlayers/' + playerEntityId + (realTime ? '?realTime=true' : ''));
 }
 
 api.getPlayerInventory = function (playerEntityId) {
-    return axios.get('/ServerManage/PlayerInventory/' + playerEntityId);
+    return axios.get('/Players/PlayerInventory/' + playerEntityId);
+}
+
+api.getHistoryPlayers = function () {
+    return axios.get('/Players/HistoryPlayers');
+}
+
+api.getChatRecord = function (params) {
+    return axios.get('/ChatRecord', {
+        params: params
+    });
 }

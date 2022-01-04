@@ -1,4 +1,5 @@
-﻿using LSTY.Sdtd.PatronsMod.Internal;
+﻿using IceCoffee.Common.Extensions;
+using LSTY.Sdtd.PatronsMod.Internal;
 using LSTY.Sdtd.Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -81,37 +82,45 @@ namespace LSTY.Sdtd.PatronsMod.Extensions
 
         private static InvItem CreateInvItem(ItemValue itemValue, int count, int entityId)
         {
-            if (count <= 0 || itemValue == null || itemValue.Equals(ItemValue.None))
+            try
             {
+                if (count <= 0 || itemValue == null || itemValue.Equals(ItemValue.None))
+                {
+                    return null;
+                }
+
+                ItemClass itemClass = ItemClass.list[itemValue.type];
+                //int maxAllowed = itemClass.Stacknumber.Value;
+                string name = itemClass.GetItemName();
+
+                //string steamId = ConnectionManager.Instance.Clients.ForEntityId(entityId).playerId;
+
+                //var inventoryCheck = FunctionManager.AntiCheat.InventoryCheck;
+                //if (inventoryCheck.IsEnabled)
+                //{
+                //    inventoryCheck.Execute(steamId, name, count, maxAllowed);
+                //}
+
+                int quality = itemValue.HasQuality ? itemValue.Quality : -1;
+
+                InvItem item = new InvItem()
+                {
+                    ItemName = name,
+                    Count = count,
+                    Quality = quality,
+                    Icon = itemClass.GetIconName(),
+                    IconColor = itemClass.GetIconTint().ToHex(),
+                    MaxUseTimes = itemValue.MaxUseTimes,
+                    UseTimes = itemValue.UseTimes
+                };
+
+                return item;
+            }
+            catch (Exception ex)
+            {
+                CustomLogger.Warn(ex, "Error in PlayerDataFileExtension.CreateInvItem" + Environment.NewLine + itemValue.ToJson());
                 return null;
             }
-
-            ItemClass itemClass = ItemClass.list[itemValue.type];
-            //int maxAllowed = itemClass.Stacknumber.Value;
-            string name = itemClass.GetItemName();
-
-            //string steamId = ConnectionManager.Instance.Clients.ForEntityId(entityId).playerId;
-
-            //var inventoryCheck = FunctionManager.AntiCheat.InventoryCheck;
-            //if (inventoryCheck.IsEnabled)
-            //{
-            //    inventoryCheck.Execute(steamId, name, count, maxAllowed);
-            //}
-
-            int quality = itemValue.HasQuality ? itemValue.Quality : -1;
-
-            InvItem item = new InvItem()
-            {
-                ItemName = name,
-                Count = count,
-                Quality = quality,
-                Icon = itemClass.GetIconName(),
-                Iconcolor = itemClass.GetIconTint().ToHex(),
-                MaxUseTimes = itemValue.MaxUseTimes,
-                UseTimes = itemValue.UseTimes
-            };
-
-            return item;
         }
         #endregion
     }

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <template>
+            <el-table :data="tableData" border style="width: 100%" :height="tableHeight" highlight-current-row
+                ref="table">
+                <el-table-column type="index" width="60">
+                </el-table-column>
+                <el-table-column prop="createdDate" label="日期" width="160" sortable :formatter="format_createdDate">
+                </el-table-column>
+                <el-table-column prop="entityId" label="实体Id" width="88" sortable>
+                </el-table-column>
+                <el-table-column prop="senderName" label="发送者昵称" width="176" sortable>
+                </el-table-column>
+                <el-table-column prop="chatType" label="类型" width="77" sortable :formatter="format_chatType">
+                </el-table-column>
+                <el-table-column prop="message" label="消息内容" sortable>
+                </el-table-column>
+                <el-table-column prop="platformUserId" label="平台Id" width="162" sortable>
+                </el-table-column>
+                <el-table-column prop="eos" label="EOS" width="280" sortable>
+                </el-table-column>
+            </el-table>
+            <el-pagination style="margin-top: 8px;" v-on:size-change="onPageSizeChange" v-on:current-change="onCurrentPageChange"
+                v-bind:page-sizes="[10, 20, 50, 100]" v-bind:current-page="pagination.currentPage"
+                v-bind:page-size="pagination.pageSize" v-bind:total="pagination.total"
+                layout="total, sizes, prev, pager, next, jumper">
+            </el-pagination>
+        </template>
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/vue-contextmenujs/dist/contextmenu.umd.js"></script>
+<script src="/js/global.js"></script>
+<script src="/js/api.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            return {
+                tableHeight: document.body.clientHeight - 40,
+                tableData: [],
+                pagination: {
+                    currentPage: 1,
+                    pageSize: 20,
+                    total: 0,
+                },
+            };
+        },
+        created() {
+            this.getChatRecord();
+            window.onresize = () => {
+                this.tableHeight = document.body.clientHeight - 40;
+            };
+        },
+        methods: {
+            showMessage(message) {
+                top.Vue.prototype.$message.success(message);
+            },
+            getChatRecord() {
+                const params = {
+                    pageIndex: this.pagination.currentPage,
+                    pageSize: this.pagination.pageSize,
+                    desc: true
+                };
+                api.getChatRecord(params).then((response) => {
+                    this.tableData = response.data.data.items;
+                    this.pagination.total = response.data.data.total;
+                });
+            },
+            format_createdDate(row) {
+                const value = row.createdDate;
+                return value.substring(0, 19).replace('T', ' ');
+            },
+            format_chatType(row) {
+                let type;
+                switch (row.chatType) {
+                    // Global
+                    case 0:
+                        type = '公屏';
+                        break;
+                    // Friends
+                    case 1:
+                        type = '好友';
+                        break;
+                    // Party
+                    case 2:
+                        type = '阵营';
+                        break;
+                    // Whisper
+                    case 3:
+                        type = '私聊';
+                        break;
+                    default:
+                        type = '未知';
+                }
+                return type;
+            },
+            onPageSizeChange(val) {
+                this.pagination.pageSize = val;
+                this.getChatRecord();
+            },
+            onCurrentPageChange(val) {
+                this.pagination.currentPage = val;
+                this.getChatRecord();
+            },
+        }
+    });
+</script>
+
+</html>

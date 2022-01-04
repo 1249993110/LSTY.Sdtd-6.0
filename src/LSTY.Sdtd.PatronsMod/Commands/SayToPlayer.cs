@@ -14,8 +14,8 @@ namespace LSTY.Sdtd.PatronsMod.Commands
         public override string GetHelp()
         {
             return "Usage:\n" +
-                   "  1. ty-pm <entity id / platform user id / player name> <message>\n" +
-                   "1. Send a PM to the player given by the entity id or platform user id or player name (as given by e.g. \"lpi\").";
+                   "  1. ty-pm <EOS/EntityId/PlayerName> <Message>\n" +
+                   "1. Send a PM to the player given by the EOS or entity id or player name (as given by e.g. \"lpi\").";
         }
 
         public override string[] GetCommands()
@@ -44,7 +44,7 @@ namespace LSTY.Sdtd.PatronsMod.Commands
 
             receiver.SendPackage(NetPackageManager.GetPackage<NetPackageChat>().Setup(EChatType.Whisper, -1, message, senderName, false, null));
 
-            CustomLogger.Info("Message to player {0} sent with sender {1}.", receiver.PlatformId.CombinedString, senderId);
+            CustomLogger.Info("Message \"{0}\" to player {1} sent with sender {2}.", message, receiver.PlatformId.CombinedString, senderId);
         }
 
         private void InternalExecute(ClientInfo sender, List<string> args)

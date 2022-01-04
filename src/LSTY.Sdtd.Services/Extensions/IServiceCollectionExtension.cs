@@ -15,6 +15,7 @@ namespace LSTY.Sdtd.Services.Extensions
             services.AddSingleton<SignalRManager>();
             services.AddSingleton<FunctionFactory>();
             services.AddSingleton<ILivePlayers, LivePlayers>();
+            services.AddSingleton<PersistentManager>();
             services.AddHostedService<Worker>();
 
             return services;

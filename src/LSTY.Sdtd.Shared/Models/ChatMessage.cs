@@ -10,7 +10,7 @@ namespace LSTY.Sdtd.Shared.Models
     {
         public int EntityId { get; set; }
 
-        public string PlayerName { get; set; }
+        public string SenderName { get; set; }
 
         public ChatType ChatType { get; set; }
 

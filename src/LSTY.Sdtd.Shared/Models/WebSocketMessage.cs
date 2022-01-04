@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace LSTY.Sdtd.Shared.Models
 {
-    public enum ChatType : int
+    public class WebSocketMessage
     {
-        Global = 0,
-        Friends = 1,
-        Party = 2,
-        Whisper = 3
+        public WebSocketMessageType MessageType { get; set; }
+
+        public object MessageEntity { get; set; }
     }
 }

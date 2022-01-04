@@ -1,4 +1,5 @@
 ﻿using IceCoffee.AspNetCore.Authentication;
+using LSTY.Sdtd.Services;
 using LSTY.Sdtd.Services.Managers;
 using LSTY.Sdtd.Shared.Models;
 using LSTY.Sdtd.WebApi.Models;
@@ -9,6 +10,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 
 namespace LSTY.Sdtd.WebApi.Middlewares
 {
@@ -18,6 +20,7 @@ namespace LSTY.Sdtd.WebApi.Middlewares
         private readonly ILogger<WebSocketMiddleware> _logger;
         private readonly AppSettings _appSettings;
         private readonly ConcurrentDictionary<string, WebSocket> _clients;
+        private readonly ILivePlayers _livePlayers;
 
 
         private struct RecvLoopEntry
@@ -31,19 +34,51 @@ namespace LSTY.Sdtd.WebApi.Middlewares
         {
             public string ConnectionId;
             public WebSocket WebSocket;
-            public LogEntry LogEntry;
+            public WebSocketMessage WebSocketMessage;
         }
 
-        public WebSocketMiddleware(RequestDelegate next, ILogger<WebSocketMiddleware> logger, IOptions<AppSettings> options, SignalRManager signalRManager)
+        public WebSocketMiddleware(RequestDelegate next, ILogger<WebSocketMiddleware> logger, IOptions<AppSettings> options,
+            SignalRManager signalRManager, ILivePlayers livePlayers)
         {
             _next = next;
             _logger = logger;
             _appSettings = options.Value;
             _clients = new ConcurrentDictionary<string, WebSocket>();
             signalRManager.ModEventHookHub.LogCallback += On_ModEventHookHub_LogCallback;
+            signalRManager.ModEventHookHub.ChatMessage += On_ModEventHookHub_ChatMessage;
+            signalRManager.ModEventHookHub.SavePlayerData += On_ModEventHookHub_SavePlayerData;
+            _livePlayers = livePlayers;
         }
 
+
+
         private void On_ModEventHookHub_LogCallback(LogEntry logEntry)
+        {
+            SendMessageToAllClients(new WebSocketMessage()
+            {
+                MessageType = Shared.Models.WebSocketMessageType.ConsoleLog,
+                MessageEntity = logEntry
+            });
+        }
+        private void On_ModEventHookHub_ChatMessage(ChatMessage chatMessage)
+        {
+            SendMessageToAllClients(new WebSocketMessage() 
+            {
+                MessageType = Shared.Models.WebSocketMessageType.ChatMessage,
+                MessageEntity = chatMessage
+            });
+        }
+
+        private void On_ModEventHookHub_SavePlayerData(LivePlayer livePlayer)
+        {
+            SendMessageToAllClients(new WebSocketMessage()
+            {
+                MessageType = Shared.Models.WebSocketMessageType.PlayerUpdate,
+                MessageEntity = _livePlayers.Values
+            });
+        }
+
+        private void SendMessageToAllClients(WebSocketMessage webSocketMessage)
         {
             foreach (var client in _clients)
             {
@@ -53,11 +88,11 @@ namespace LSTY.Sdtd.WebApi.Middlewares
                 {
                     if (webSocket.State == WebSocketState.Open)
                     {
-                        Task.Factory.StartNew(SendMessage, new SendLoopEntry() 
-                        { 
-                            ConnectionId = connectionId, 
+                        Task.Factory.StartNew(SendMessage, new SendLoopEntry()
+                        {
+                            ConnectionId = connectionId,
                             WebSocket = webSocket,
-                            LogEntry = logEntry
+                            WebSocketMessage = webSocketMessage
                         });
                     }
                     else
@@ -68,7 +103,7 @@ namespace LSTY.Sdtd.WebApi.Middlewares
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error in WebSocketMiddleware.On_ModEventHookHub_LogCallback, Connection Id: " + connectionId);
+                    _logger.LogError(ex, "Error in WebSocketMiddleware.SendMessage, Connection Id: " + connectionId);
                 }
             }
         }
@@ -78,10 +113,15 @@ namespace LSTY.Sdtd.WebApi.Middlewares
             var sendLoopEntry = (SendLoopEntry)state;
             try
             {
-                var data = MessagePackSerializer.Serialize(sendLoopEntry.LogEntry, MessagePack.Resolvers.ContractlessStandardResolver.Options);
+                var serializedContent = JsonSerializer.Serialize(sendLoopEntry.WebSocketMessage, new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                var data = Encoding.UTF8.GetBytes(serializedContent);
 
                 var buffer = new ArraySegment<byte>(data, 0, data.Length);
-                await sendLoopEntry.WebSocket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
+                await sendLoopEntry.WebSocket.SendAsync(buffer, System.Net.WebSockets.WebSocketMessageType.Text, true, CancellationToken.None);
             }
             catch (Exception ex)
             {
@@ -162,16 +202,17 @@ namespace LSTY.Sdtd.WebApi.Middlewares
                     result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
                 }
 
-                _clients.TryRemove(connectionId, out var _);
-
                 await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
 
                 socketFinishedTcs.SetResult();
             }
             catch (Exception ex)
             {
-                _clients.TryRemove(connectionId, out var _);
                 _logger.LogError(ex, "Error in WebSocketMiddleware.RecvLoop, Connection Id: " + connectionId);
+            }
+            finally
+            {
+                _clients.TryRemove(connectionId, out var _);
             }
         }
     }

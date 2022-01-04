@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace LSTY.Sdtd.Data.IRepositories
 {
-    public interface IChatLogRepository : IRepository<T_ChatLog>
+    public interface IChatRecordRepository : IRepository<T_ChatRecord>
     {
     }
 }

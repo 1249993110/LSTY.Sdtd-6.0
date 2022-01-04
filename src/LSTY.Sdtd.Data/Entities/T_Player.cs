@@ -6,8 +6,8 @@ namespace LSTY.Sdtd.Data.Entities
 {
     public class T_Player : IEntity
     {
-        [PrimaryKey, IgnoreUpdate, IgnoreInsert]
-        public int Id { get; set; }
+        [PrimaryKey]
+        public int EntityId { get; set; }
 
         [IgnoreUpdate, IgnoreInsert]
         public DateTime CreatedDate { get; set; }
@@ -16,7 +16,6 @@ namespace LSTY.Sdtd.Data.Entities
 
         public string PlatformType { get; set; }
 
-        public int EntityId { get; set; }
 
         public string Name { get; set; }
 
@@ -45,6 +44,8 @@ namespace LSTY.Sdtd.Data.Entities
         public int PlayerKills { get; set; }
 
         public int Deaths { get; set; }
+
+        public string EOS { get; set; }
 
     }
 }

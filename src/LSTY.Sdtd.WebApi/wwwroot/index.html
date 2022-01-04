@@ -55,6 +55,32 @@
 			text-align: center;
 			color: #a0a0a0;
 		}
+
+		.image-container {
+			margin: 1px;
+			position: relative;
+		}
+
+		.image {
+			display: block;
+			height: 80px;
+			width: 80px;
+			background-color: rgba(96, 96, 96, 0.5);
+		}
+
+		.inventory-item-count {
+			color: #FFA500;
+			font-size: 20px;
+			position: absolute;
+			right: 1px;
+			bottom: 1px;
+		}
+
+		.inventory-item-quality {
+			height: 16px;
+			position: absolute;
+			bottom: 0;
+		}
 	</style>
 </head>
 
@@ -86,8 +112,51 @@
 					</el-footer>
 				</el-container>
 			</el-container>
+			<el-dialog :title="inventoryDialog.title" :visible.sync="inventoryDialog.visible" width="897px">
+				<div style="width: 859px;">
+					<div style="display: inline-block;width: 673px;vertical-align: top">
+						<div>背包</div>
+						<div id="inventory-bag" style="display: flex;flex-wrap: wrap;max-height: 410px;overflow: auto;">
+							<inventory-item v-for="(item, index) in inventoryDialog.inventory.bag" :item="item">
+							</inventory-item>
+						</div>
+					</div>
+					<div style="display: inline-block;width: 181px;vertical-align: top">
+						<div>装备</div>
+						<div style="display: flex;flex-wrap: wrap;max-height: 410px;overflow: auto;">
+							<inventory-item v-for="(item, index) in inventoryDialog.inventory.equipment" :item="item">
+							</inventory-item>
+						</div>
+					</div>
+				</div>
+				<div style="width: 820px;">
+					<div>腰带</div>
+					<div style="display: flex;flex-wrap: wrap;">
+						<inventory-item v-for="(item, index) in inventoryDialog.inventory.belt" :item="item">
+						</inventory-item>
+					</div>
+				</div>
+			</el-dialog>
 		</template>
 	</div>
+	<template id="inventory-item" style="display: none;">
+		<el-tooltip v-if="item != null" placement="bottom-start" :open-delay="500">
+			<div class="image-container">
+				<el-image :src="getIconUrl(item)" class="image" lazy></el-image>
+				<span v-if="item.quality===-1" class="inventory-item-count">{{item.count}}</span>
+				<span v-if="item.quality!==-1" :style="getQualityStyle(item)" class="inventory-item-quality"></span>
+			</div>
+			<div slot="content">
+				名称 {{item.itemName}}<br />
+				数量 {{item.count}}<br />
+				质量 {{item.quality}}<br />
+				图标 {{item.icon}}<br />
+				图标颜色 {{item.iconColor}}<br />
+				最大使用时长 {{item.maxUseTimes}}<br />
+				使用时长 {{item.useTimes}}<br />
+			</div>
+		</el-tooltip>
+	</template>
 </body>
 <!-- import Vue before Element -->
 <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
@@ -96,23 +165,86 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
 <script src="/js/global.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/sdtd-console.js"></script>
 <script>
-	const rootIns = new Vue({
+	Vue.component('inventory-item', {
+		props: ['item'],
+		template: '#inventory-item',
+		methods: {
+			getIconUrl(item) {
+				let itemName = item.icon;
+				if (item.iconColor !== 'FFFFFF') {
+					itemName += '__' + item.iconColor;
+				}
+
+				return axios.defaults.baseURL + '/ItemIcons/' + itemName + '.png';
+			},
+			getQualityStyle(item) {
+				const quality = item.quality;
+				let color;
+				switch (quality) {
+					case 0:
+						color = '808080';
+						break;
+					case 1:
+						color = '9C8867';
+						break;
+					case 2:
+						color = 'CF7F29';
+						break;
+					case 3:
+						color = 'A2A41B';
+						break;
+					case 4:
+						color = '42C234';
+						break;
+					case 5:
+						color = '315DCE';
+						break;
+					case 6:
+						color = 'A42ACC';
+						break;
+					default:
+						color = '808080';
+				}
+
+				const durability = (1 - item.useTimes / item.maxUseTimes) * 80;
+				return { 'background-color': `#${color}C8`, 'width': (durability > 80 ? 80 : durability) + 'px' };
+			}
+		}
+	});
+	top.rootIns = new Vue({
 		el: "#app",
 		data() {
 			return {
 				selectedTab: '',
-				selectedMenu: 'console',
+				selectedMenu: 'live-players',
 				menus: [{
+					name: 'live-players',
+					title: '在线玩家',
+					url: '/webcontrol/live-players.html',
+					icon: 'el-icon-user'
+				}, {
+					name: 'history-players',
+					title: '历史玩家',
+					url: '/webcontrol/history-players.html',
+					icon: 'el-icon-user-solid'
+				}, {
+					name: 'chat-message',
+					title: '实时聊天',
+					url: '/webcontrol/chat-message.html',
+					icon: 'el-icon-chat-dot-square'
+				}, {
+					name: 'chat-record',
+					title: '聊天记录',
+					url: '/webcontrol/chat-record.html',
+					icon: 'el-icon-chat-line-square'
+				}, {
 					name: 'console',
 					title: '控制台',
 					url: '/webcontrol/console.html',
 					icon: 'el-icon-loading'
-				}, {
-					name: 'liveplayers',
-					title: '在线玩家',
-					url: '/webcontrol/liveplayers.html',
-					icon: 'el-icon-user'
 				}, {
 					name: 'api-document',
 					title: '接口文档',
@@ -121,10 +253,19 @@
 					externalLink: true
 				}],
 				tabPanes: [],
+				inventoryDialog: {
+					title: '',
+					visible: false,
+					inventory: {
+						bag: [],
+						equipment: [],
+						belt: []
+					}
+				}
 			};
 		},
 		created() {
-			this.addTab('console');
+			this.addTab('live-players');
 		},
 		methods: {
 			addTab(menuName) {
@@ -160,8 +301,21 @@
 				} else {
 					this.addTab(menuName);
 				}
-			}
+			},
 
+			showInventoryDialog(inventoryDialog) {
+				this.inventoryDialog = inventoryDialog;
+
+				// const bagContainer = document.getElementById('inventory-bag');
+				// if (bagContainer != null) {
+				// 	bagContainer.scrollTop = 0;
+				// }
+			},
+		},
+		watch: {
+			selectedTab(tabName) {
+				this.selectedMenu = tabName;
+			},
 		},
 	});
 </script>

@@ -1,6 +1,8 @@
 ﻿using IceCoffee.DbCore.Primitives.Repository;
+using LSTY.Sdtd.Data.Dtos;
 using LSTY.Sdtd.Data.Entities;
 using LSTY.Sdtd.Data.IRepositories;
+using System;
 
 namespace LSTY.Sdtd.Data.Repositories
 {
@@ -18,32 +20,48 @@ namespace LSTY.Sdtd.Data.Repositories
             }
             else
             {
-                return base.Query("Name LIKE CONCAT('%',@Keyword,'%')", "CreatedDate DESC", new { Keyword = playerName });
+                return base.Query("Name LIKE '%'||@Keyword||'%'", "CreatedDate DESC", new { Keyword = playerName });
             }
         }
 
-        public IEnumerable<T_Player> QueryByEntityId(int entityId, bool fuzzySearch = false)
+        public IEnumerable<T_Player> QueryByEntityId(int entityId)
         {
-            if (fuzzySearch == false)
-            {
-                return base.QueryById(nameof(T_Player.EntityId), entityId);
-            }
-            else
-            {
-                return base.Query("EntityId LIKE CONCAT('%',@Keyword,'%')", "CreatedDate DESC", new { Keyword = entityId });
-            }
+            return base.QueryById(nameof(T_Player.EntityId), entityId);
         }
 
-        public IEnumerable<T_Player> QueryByPlatformUserId(string platformUserId, bool fuzzySearch = false)
+        public IEnumerable<T_Player> QueryByPlatformUserId(string platformUserId)
         {
-            if (fuzzySearch == false)
+            return base.QueryById(nameof(T_Player.PlatformUserId), platformUserId);
+        }
+
+        public IEnumerable<T_Player> QueryByEOS(string EOS)
+        {
+            return base.QueryById(nameof(T_Player.EOS), EOS);
+        }
+
+        public async Task<PaginationResultDto> QueryPagedAsync(PlayersQueryDto dto)
+        {
+            string orderBy = null;
+
+            if (string.IsNullOrEmpty(dto.Order) == false)
             {
-                return base.QueryById(nameof(T_Player.PlatformUserId), platformUserId);
+                orderBy = dto.Order + (dto.Desc ? "DESC" : "ASC");
             }
             else
             {
-                return base.Query("PlatformUserId LIKE CONCAT('%',@Keyword,'%')", "CreatedDate DESC", new { Keyword = platformUserId });
+                orderBy = "CreatedDate " + (dto.Desc ? "DESC" : "ASC");
             }
+
+            string whereBy = null;
+            if (string.IsNullOrEmpty(dto.IdOrName) == false)
+            {
+                whereBy = "EntityId=@IdOrName OR PlatformUserId=@IdOrName OR EOS=@IdOrName OR SenderName LIKE '%'||@IdOrName||'%'";
+            }
+
+            var items = await base.QueryPagedAsync(dto.PageIndex, dto.PageSize, whereBy, orderBy, dto);
+            uint total = await base.QueryRecordCountAsync(whereBy, dto);
+
+            return new PaginationResultDto() { Items = items, Total = total };
         }
     }
 }

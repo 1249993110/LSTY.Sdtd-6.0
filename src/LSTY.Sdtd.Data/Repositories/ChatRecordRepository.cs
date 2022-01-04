@@ -5,9 +5,9 @@ using LSTY.Sdtd.Data;
 
 namespace LSTY.Sdtd.Data.Repositories
 {
-    public class ChatLogRepository : SQLiteRepository<T_ChatLog>, IChatLogRepository
+    public class ChatRecordRepository : SQLiteRepository<T_ChatRecord>, IChatRecordRepository
     {
-        public ChatLogRepository(DefaultDbConnectionInfo dbConnectionInfo) : base(dbConnectionInfo)
+        public ChatRecordRepository(DefaultDbConnectionInfo dbConnectionInfo) : base(dbConnectionInfo)
         {
         }
 

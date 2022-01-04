@@ -9,6 +9,7 @@ namespace LSTY.Sdtd.Shared.Models
     public class LogEntry
     {
         public string Message { get; set; }
+
         public LogType LogType { get; set; }
     }
 }

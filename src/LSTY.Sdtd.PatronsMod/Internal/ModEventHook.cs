@@ -162,7 +162,7 @@ namespace LSTY.Sdtd.PatronsMod.Internal
                 ChatType = (ChatType)eChatType,
                 EntityId = senderId,
                 Message = message,
-                PlayerName = clientInfo?.playerName,
+                SenderName = clientInfo?.playerName ?? (localizeMain ? Localization.Get(mainName) : mainName),
             };
 
             Task.Factory.StartNew((state) =>
@@ -210,7 +210,7 @@ namespace LSTY.Sdtd.PatronsMod.Internal
         {
             Task.Factory.StartNew((state) =>
             {
-                _hub.OnPlayerSpawning(((ClientInfo)state).ToLivePlayer());
+                _hub.OnPlayerSpawning(((ClientInfo)state).ToLivePlayer(true));
             }, clientInfo);
         }
 

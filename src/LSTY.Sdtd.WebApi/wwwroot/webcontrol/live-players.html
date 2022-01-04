@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+        }
+
+        .el-card {
+            border-radius: 2px
+        }
+
+        .el-card__body {
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <template>
+            <el-table :data="tableData" border style="width: 100%" :height="tableHeight" highlight-current-row
+                ref="table" @row-contextmenu="onContextmenu">
+                <el-table-column type="index" width="45">
+                </el-table-column>
+                <el-table-column prop="entityId" label="实体Id" width="88" sortable>
+                </el-table-column>
+                <el-table-column prop="name" label="玩家昵称" width="112" sortable>
+                </el-table-column>
+                <el-table-column prop="platformUserId" label="平台Id" width="162" sortable>
+                </el-table-column>
+                <el-table-column prop="platformType" label="平台类型" width="77">
+                </el-table-column>
+                <el-table-column prop="currentLife" label="存活时长" width="101" :formatter="format_currentLife" sortable>
+                </el-table-column>
+                <el-table-column prop="totalPlayTime" label="总游戏时长" width="115" :formatter="format_totalPlayTime"
+                    sortable>
+                </el-table-column>
+                <el-table-column prop="level" label="等级" width="73" sortable>
+                </el-table-column>
+                <el-table-column prop="lastPosition" label="玩家坐标" width="128" :formatter="format_lastPosition">
+                </el-table-column>
+                <el-table-column prop="zombieKills" label="击杀僵尸" width="101" sortable>
+                </el-table-column>
+                <el-table-column prop="playerKills" label="击杀玩家" width="101" sortable>
+                </el-table-column>
+                <el-table-column prop="deaths" label="死亡次数" width="101" sortable>
+                </el-table-column>
+                <el-table-column prop="expToNextLevel" label="升级所需经验" width="110">
+                </el-table-column>
+                <el-table-column prop="ip" label="IP地址" width="132" sortable>
+                </el-table-column>
+                <el-table-column prop="ping" label="延迟" width="60">
+                </el-table-column>
+                <el-table-column prop="landProtectionActive" label="领地石保护状态" :formatter="format_landProtectionActive">
+                </el-table-column>
+                <el-table-column prop="landProtectionMultiplier" label="领地石保护倍数">
+                </el-table-column>
+            </el-table>
+        </template>
+    </div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/vue-contextmenujs/dist/contextmenu.umd.js"></script>
+<script src="/js/global.js"></script>
+<script src="/js/api.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            return {
+                tableHeight: document.body.clientHeight,
+                tableData: [],
+            };
+        },
+        created() {
+            this.getLivePlayers(true);
+            window.onresize = () => {
+                this.tableHeight = document.body.clientHeight;
+            };
+            top.Vue.prototype.$EventBus.$on('on_playerUpdate', (livePlayers) => {
+                //console.log(livePlayers)
+                this.tableData = livePlayers;
+            });
+        },
+        methods: {
+            showMessage(message) {
+                top.Vue.prototype.$message.success(message);
+            },
+            formatMinute(totalMinute) {
+                const day = parseInt(totalMinute / 60 / 24);
+                const hour = parseInt(totalMinute / 60 % 24);
+                const minute = parseInt(totalMinute % 60);
+                let result = '';
+                if (day > 0) {
+                    result = day + ' 天 ';
+                }
+                if (hour > 0) {
+                    result += hour + ' 小时 ';
+                }
+                if (minute > 0) {
+                    result += minute + ' 分钟 ';
+                }
+                return result;
+            },
+            getLivePlayers() {
+                api.getLivePlayers().then((response) => {
+                    this.tableData = response.data.data;
+                });
+            },
+            onContextmenu(row, column, event) {
+                event.preventDefault();
+                this.$refs.table.setCurrentRow(row);
+
+                const entityId = row.entityId;
+                const playerName = row.name;
+
+                this.$contextmenu({
+                    items: [
+                        {
+                            label: "查看背包",
+                            onClick: () => {
+                                api.getPlayerInventory(entityId).then(({ data }) => {
+                                    top.rootIns.showInventoryDialog({
+                                        title: `玩家 ${playerName} 的背包`,
+                                        visible: true,
+                                        inventory: data.data
+                                    });
+                                });
+                            },
+                            icon: 'el-icon-view',
+                            divided: true
+                        },
+                        {
+                            label: "复制",
+                            children: [
+                                {
+                                    label: "复制玩家昵称",
+                                    onClick: () => {
+                                        navigator.clipboard.writeText(playerName).then(() => { this.showMessage('复制成功'); });
+                                    }
+                                },
+                                {
+                                    label: "复制玩家实体Id",
+                                    onClick: () => {
+                                        navigator.clipboard.writeText(entityId).then(() => { this.showMessage('复制成功'); });
+                                    }
+                                },
+                                {
+                                    label: "复制玩家坐标",
+                                    onClick: () => {
+                                        navigator.clipboard.writeText(this.format_lastPosition(row)).then(() => { this.showMessage('复制成功'); });
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            label: "给予物品",
+                            onClick: () => {
+                                this.$prompt('{itemName} {count} {quality} {durability}', '请输入物品名称', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    inputPattern: null,
+                                    inputErrorMessage: null
+                                }).then(({ value }) => {
+                                    api.sendConsoleCommand(`ty-gi ${entityId} ${value}`).then(() => {
+                                        this.showMessage('发送命令成功');
+                                    });
+                                });
+                            },
+                        },
+                        {
+                            label: "生成实体",
+                            onClick: () => {
+                                this.$prompt('{spawnEntityIdOrName}', '请输入实体Id或名称', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    inputPattern: null,
+                                    inputErrorMessage: null
+                                }).then(({ value }) => {
+                                    api.spawnEntity(entityId, value).then(() => {
+                                        this.showMessage('发送命令成功');
+                                    });
+                                });
+                            },
+                        },
+                        {
+                            label: "传送玩家",
+                            onClick: () => {
+                                this.$prompt('{target}', '请输入目标，可为Id或三维坐标', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    inputPattern: null,
+                                    inputErrorMessage: null
+                                }).then(({ value }) => {
+                                    api.telePlayer(entityId, value).then(() => {
+                                        this.showMessage('发送命令成功');
+                                    });
+                                });
+                            },
+                            icon: 'el-icon-map-location',
+                            divided: true
+                        },
+                        {
+                            label: "踢出玩家",
+                            onClick: () => {
+                                this.$confirm('此操作将踢出选定玩家, 是否继续?', '提示', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                                }).then(() => {
+                                    api.kickPlayer(entityId).then(() => {
+                                        this.showMessage('发送命令成功');
+                                    });
+                                });
+                            },
+                        },
+                        {
+                            label: "封禁玩家",
+                            onClick: () => {
+                                this.$prompt('e.g. 2 minutes \"Time for a break\" \"Joel\"', '封禁玩家-请输入可选参数', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    inputPattern: null,
+                                    inputErrorMessage: null
+                                }).then(({ value }) => {
+                                    api.telePlayer(entityId, value).then(() => {
+                                        this.showMessage('发送命令成功');
+                                    });
+                                });
+                            },
+                            divided: true
+                        },
+                        {
+                            label: "发送私聊消息",
+                            onClick: () => {
+                                this.$prompt('{message}', '请输入文本', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    inputPattern: null,
+                                    inputErrorMessage: null
+                                }).then(({ value }) => {
+                                    api.sendMessageToPlayer(entityId, value).then(() => {
+                                        this.showMessage('发送命令成功');
+                                    });
+                                });
+                            },
+                            icon: 'el-icon-message',
+                        },
+                        {
+                            label: "设置为超级管理员",
+                            onClick: () => {
+                                this.$confirm('此操作将把选定玩家设置为超级管理员, 是否继续?', '提示', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                                }).then(() => {
+                                    api.addAdmin(entityId, 0, '超级管理员-' + playerName).then(() => {
+                                        this.showMessage('发送命令成功');
+                                    });
+                                });
+                            },
+                        },
+                    ],
+                    event,
+                    minWidth: 230
+                });
+            },
+            format_currentLife(row) {
+                const value = row.currentLife;
+                return this.formatMinute(value);
+            },
+            format_totalPlayTime(row) {
+                const value = row.totalPlayTime;
+                return this.formatMinute(value);
+            },
+            format_lastPosition(row) {
+                const value = row.lastPosition;
+                return `${value.x} ${value.y} ${value.z}`;
+            },
+            format_landProtectionActive(row) {
+                const value = row.landProtectionActive;
+                return value ? '激活' : '未激活';
+            }
+        }
+    });
+</script>
+
+</html>

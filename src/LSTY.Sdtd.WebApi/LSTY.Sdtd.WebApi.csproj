@@ -12,9 +12,26 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="IceCoffee.AspNetCore" Version="1.0.0" />
-	  <PackageReference Include="MessagePack" Version="2.3.85" />
+	  <Content Remove="appsettings.Development.json" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="appsettings.Development.json">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="IceCoffee.AspNetCore" Version="1.0.0.3" GeneratePathProperty="true" />
+	</ItemGroup>
+	
+	<Target Name="CopyXMLFromPackagesOnBuild" AfterTargets="Build">
+		<Copy SourceFiles="$(PkgIceCoffee_AspNetCore)\lib\net6.0\IceCoffee.AspNetCore.xml" DestinationFolder="$(OutDir)" />
+	</Target>
+	<Target Name="CopyXMLFromPackagesOnPublish" AfterTargets="Publish">
+		<Copy SourceFiles="$(PkgIceCoffee_AspNetCore)\lib\net6.0\IceCoffee.AspNetCore.xml" DestinationFolder="$(PublishDir)" />
+	</Target>
+
 
 	<ItemGroup>
 		<ProjectReference Include="..\LSTY.Sdtd.Services\LSTY.Sdtd.Services.csproj" />

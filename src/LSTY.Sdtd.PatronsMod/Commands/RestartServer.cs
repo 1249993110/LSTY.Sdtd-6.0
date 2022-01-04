@@ -42,7 +42,7 @@ namespace LSTY.Sdtd.PatronsMod.Commands
 
         public override void Execute(List<string> args, CommandSenderInfo senderInfo)
 		{
-			Log("Server is restarting...");
+			Log("Server is restarting..., please wait");
 
 			if (args.Count > 0)
             {
@@ -79,13 +79,13 @@ namespace LSTY.Sdtd.PatronsMod.Commands
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
 				scriptName = "restart-windows.bat";
-				serverPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory , "startdedicated.bat");
+				serverPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "startdedicated.bat");
 			}
 			else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 			{
 				scriptName = "restart-linux.sh";
 				serverPath = AppDomain.CurrentDomain.BaseDirectory;
-				Process.Start("chmod", " +x " + Path.Combine(ModApi.ModDirectory + "restart.sh"));
+				Process.Start("chmod", " +x " + Path.Combine(ModApi.ModDirectory, scriptName));
 			}
 
 			string path = Path.Combine(ModApi.ModDirectory, scriptName);

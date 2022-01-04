@@ -1,14 +1,10 @@
-﻿using LSTY.Sdtd.Services.HubReceivers;
+﻿using LSTY.Sdtd.Data.IRepositories;
 using LSTY.Sdtd.Services.Managers;
 using LSTY.Sdtd.Shared.Hubs;
 using LSTY.Sdtd.Shared.Models;
-using Microsoft.AspNet.SignalR.Client;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace LSTY.Sdtd.Services
 {
@@ -23,7 +19,6 @@ namespace LSTY.Sdtd.Services
         public LivePlayers(ILogger<LivePlayers> logger, SignalRManager signalRManager)
         {
             _logger = logger;
-
             _serverManageHub = signalRManager.ServerManageHub;
 
             signalRManager.ModEventHookHub.SavePlayerData += OnSavePlayerData;
@@ -46,7 +41,7 @@ namespace LSTY.Sdtd.Services
                 var livePlayers = _serverManageHub.GetLivePlayers().Result;
                 foreach (var livePlayer in livePlayers)
                 {
-                    base[livePlayer.EntityId] = livePlayer;
+                    base.TryAdd(livePlayer.EntityId, livePlayer);
                 }
 
                 if (livePlayers.Count > 0)
@@ -62,6 +57,8 @@ namespace LSTY.Sdtd.Services
 
         private void On_SignalRManager_Connected()
         {
+            // 可能是异常断开
+            base.Clear();
             TryGetLivePlayersFromServer();
         }
 
@@ -75,11 +72,11 @@ namespace LSTY.Sdtd.Services
 
         IEnumerable<LivePlayer> ILivePlayers.Values => Values;
 
-        LivePlayer ILivePlayers.this[int entityId] 
+        LivePlayer ILivePlayers.this[int entityId]
         {
-            get 
+            get
             {
-                if(TryGetPlayer(entityId, out var livePlayer))
+                if (TryGetPlayer(entityId, out var livePlayer))
                 {
                     return livePlayer;
                 }
@@ -93,7 +90,7 @@ namespace LSTY.Sdtd.Services
             if (base.TryGetValue(entityId, out livePlayer) == false)
             {
                 livePlayer = _serverManageHub.GetLivePlayer(entityId).Result;
-                if(livePlayer == null)
+                if (livePlayer == null)
                 {
                     return false;
                 }
@@ -114,28 +111,61 @@ namespace LSTY.Sdtd.Services
 
         private void OnPlayerDisconnected(int entityId)
         {
-            base.TryRemove(entityId, out _);
-
-            if (base.IsEmpty && _serverManageHub.GetLivePlayerCount().Result == 0)
+            try
             {
-                ServerNonePlayer?.Invoke();
+                base.TryRemove(entityId, out _);
+
+                if (base.IsEmpty && _serverManageHub.GetLivePlayerCount().Result == 0)
+                {
+                    ServerNonePlayer?.Invoke();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in LivePlayers.OnPlayerDisconnected");
             }
         }
 
         private void OnSavePlayerData(LivePlayer livePlayer)
         {
-            base[livePlayer.EntityId] = livePlayer;
+            try
+            {
+                if (livePlayer.EntityId < 0) 
+                {
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(livePlayer.IP))
+                {
+                    base.TryRemove(livePlayer.EntityId, out _);
+                }
+                else
+                {
+                    base[livePlayer.EntityId] = livePlayer;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in LivePlayers.OnSavePlayerData");
+            }
         }
 
         private void OnPlayerSpawning(LivePlayer livePlayer)
         {
-            bool isEmpty = base.IsEmpty;
-
-            base[livePlayer.EntityId] = livePlayer;
-
-            if (isEmpty && _serverManageHub.GetLivePlayerCount().Result > 0)
+            try
             {
-                ServerHavePlayerAgain?.Invoke();
+                bool isEmpty = base.IsEmpty;
+
+                base[livePlayer.EntityId] = livePlayer;
+
+                if (isEmpty && _serverManageHub.GetLivePlayerCount().Result > 0)
+                {
+                    ServerHavePlayerAgain?.Invoke();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in LivePlayers.OnPlayerSpawning");
             }
         }
     }

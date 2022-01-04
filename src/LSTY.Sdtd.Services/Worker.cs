@@ -18,12 +18,14 @@ namespace LSTY.Sdtd.Services
         private readonly ILogger<Worker> _logger;
         private readonly SignalRManager _signalRManager;
         private readonly FunctionFactory _functionFactory;
+        private readonly IServiceProvider _serviceProvider;
 
-        public Worker(ILogger<Worker> logger, SignalRManager signalRManager, FunctionFactory functionFactory)
+        public Worker(ILogger<Worker> logger, SignalRManager signalRManager, FunctionFactory functionFactory, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _signalRManager = signalRManager;
             _functionFactory = functionFactory;
+            _serviceProvider = serviceProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -34,6 +36,9 @@ namespace LSTY.Sdtd.Services
                 {
                     // 连接 SignalR 服务端
                     await _signalRManager.ConnectAsync();
+
+                    // 加载持久化控制器
+                    _serviceProvider.GetRequiredService<PersistentManager>();
 
                     // 初始化功能
                     _functionFactory.Initialize();

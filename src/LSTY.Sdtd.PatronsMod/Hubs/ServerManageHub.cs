@@ -79,5 +79,59 @@ namespace LSTY.Sdtd.PatronsMod
                 return ConnectionManager.Instance.Clients.ForEntityId((int)state)?.latestPlayerData.GetInventory();
             }, entityId);
         }
+
+        public async Task<byte[]> GetItemIcon(string iconName)
+        {
+            return await Task.Factory.StartNew((state) =>
+            {
+                string iconPath = FindIconPath((string)state);
+                if (iconPath == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return File.ReadAllBytes(iconPath);
+                }
+            }, iconName);
+        }
+
+        private static string FindIconPath(string iconName)
+        {
+            string path = "Data/ItemIcons/" + iconName;
+            if (File.Exists(path))
+            {
+                return path;
+            }
+
+            foreach (Mod mod in ModManager.GetLoadedMods())
+            {
+                path = Path.Combine(mod.Path, "ItemIcons", iconName);
+                if (File.Exists(path))
+                {
+                    return path;
+                }
+
+                foreach (string dir in Directory.GetDirectories(mod.Path))
+                {
+                    path = Path.Combine(dir, iconName);
+                    if (File.Exists(path))
+                    {
+                        return path;
+                    }
+
+                    foreach (string subDir in Directory.GetDirectories(dir))
+                    {
+                        path = Path.Combine(subDir, iconName);
+                        if (File.Exists(path))
+                        {
+                            return path;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }

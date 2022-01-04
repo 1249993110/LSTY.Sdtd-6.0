@@ -12,12 +12,15 @@ namespace LSTY.Sdtd.PatronsMod
     {
         public const string ModIdentity = "LSTY.Sdtd.PatronsMod";
 
+        private static Mod _modInstance;
+
         private static SynchronizationContext _mainThreadContext;
         internal static SynchronizationContext MainThreadContext => _mainThreadContext;
 
-        internal static readonly string ModDirectory = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        internal static string ModDirectory => _modInstance.Path;
 
-        internal static readonly AppSettings AppSettings = ConfigurationLoader.GetCallingAssemblySettings<AppSettings>();
+        private static AppSettings _appSettings;
+        internal static AppSettings AppSettings => _appSettings;
 
         internal static ClientInfo GetCmdExecuteDelegate() => new ClientInfo() { PlatformId =  new UserIdentifierLocal(ModApi.ModIdentity) };
 
@@ -25,7 +28,11 @@ namespace LSTY.Sdtd.PatronsMod
         {
             try
             {
+                _modInstance = modInstance;
+
                 _mainThreadContext = SynchronizationContext.Current;
+
+                _appSettings = ConfigurationLoader.GetCallingAssemblySettings<AppSettings>();
 
                 StartupSignalR();
 

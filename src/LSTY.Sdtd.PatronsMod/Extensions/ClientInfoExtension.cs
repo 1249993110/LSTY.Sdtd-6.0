@@ -10,34 +10,63 @@ namespace LSTY.Sdtd.PatronsMod.Extensions
 {
     internal static class ClientInfoExtension
     {
-        public static LivePlayer ToLivePlayer(this ClientInfo clientInfo)
+        public static LivePlayer ToLivePlayer(this ClientInfo clientInfo, bool isPlayerSpawning = false)
         {
             try
             {
                 PlayerDataFile pdf = clientInfo.latestPlayerData;
-                Progression progression = GetProgression(pdf);
-                var landProtection = GetLandProtectionActiveAndMultiplier(clientInfo.entityId);
 
-                return new LivePlayer()
+                if(pdf == null || isPlayerSpawning)
                 {
-                    PlatformUserId = clientInfo.PlatformId.ReadablePlatformUserIdentifier,
-                    PlatformType = clientInfo.PlatformId.PlatformIdentifierString,
-                    EntityId = clientInfo.entityId,
-                    Name = clientInfo.playerName,
-                    IP = clientInfo.ip,
-                    ExpToNextLevel = progression == null ? 0 : progression.ExpToNextLevel,
-                    Level = progression == null ? 0 : progression.Level,
-                    Ping = clientInfo.ping,
-                    CurrentLife = pdf.currentLife,
-                    TotalPlayTime = pdf.totalTimePlayed,
-                    LastPosition = GetLastPosition(clientInfo.entityId),
-                    Score = pdf.score,
-                    ZombieKills = pdf.zombieKills,
-                    PlayerKills = pdf.playerKills,
-                    Deaths = pdf.deaths,
-                    LandProtectionActive = landProtection.Item1,
-                    LandProtectionMultiplier = landProtection.Item2
-                };
+                    return new LivePlayer()
+                    {
+                        PlatformUserId = clientInfo.PlatformId.ReadablePlatformUserIdentifier,
+                        PlatformType = clientInfo.PlatformId.PlatformIdentifierString,
+                        EntityId = clientInfo.entityId,
+                        Name = clientInfo.playerName,
+                        IP = clientInfo.ip,
+                        ExpToNextLevel = -1,
+                        Level = -1,
+                        Ping = clientInfo.ping,
+                        CurrentLife = -1,
+                        TotalPlayTime = -1,
+                        LastPosition = new Position(-1, -1, -1),
+                        Score = -1,
+                        ZombieKills = -1,
+                        PlayerKills = -1,
+                        Deaths = -1,
+                        LandProtectionActive = false,
+                        LandProtectionMultiplier = -1,
+                        EOS = clientInfo.CrossplatformId.ReadablePlatformUserIdentifier
+                    };
+                }
+                else
+                {
+                    Progression progression = GetProgression(pdf);
+                    var landProtection = GetLandProtectionActiveAndMultiplier(clientInfo.entityId);
+
+                    return new LivePlayer()
+                    {
+                        PlatformUserId = clientInfo.PlatformId.ReadablePlatformUserIdentifier,
+                        PlatformType = clientInfo.PlatformId.PlatformIdentifierString,
+                        EntityId = clientInfo.entityId,
+                        Name = clientInfo.playerName,
+                        IP = clientInfo.ip,
+                        ExpToNextLevel = progression == null ? -1 : progression.ExpToNextLevel,
+                        Level = progression == null ? -1 : progression.Level,
+                        Ping = clientInfo.ping,
+                        CurrentLife = pdf.currentLife,
+                        TotalPlayTime = pdf.totalTimePlayed,
+                        LastPosition = GetLastPosition(clientInfo.entityId),
+                        Score = pdf.score,
+                        ZombieKills = pdf.zombieKills,
+                        PlayerKills = pdf.playerKills,
+                        Deaths = pdf.deaths,
+                        LandProtectionActive = landProtection.Item1,
+                        LandProtectionMultiplier = landProtection.Item2,
+                        EOS = clientInfo.CrossplatformId.ReadablePlatformUserIdentifier
+                    };
+                }
             }
             catch (Exception ex)
             {
@@ -99,7 +128,7 @@ namespace LSTY.Sdtd.PatronsMod.Extensions
             catch (Exception ex)
             {
                 CustomLogger.Warn(ex, "Get player land protection state failed");
-                return new Tuple<bool, float>(default, default);
+                return new Tuple<bool, float>(false, -1);
             }
         }
 

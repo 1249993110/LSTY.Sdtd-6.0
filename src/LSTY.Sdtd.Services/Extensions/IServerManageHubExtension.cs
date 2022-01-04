@@ -35,9 +35,9 @@ namespace LSTY.Sdtd.Services.Extensions
 
         #region Teleport player
 
-        public static Task TelePlayer(this IServerManageHub hub, object playerIdOrName, string targetId)
+        public static Task TelePlayer(this IServerManageHub hub, object playerIdOrName, string target)
         {
-            return hub.ExecuteConsoleCommand($"tele {playerIdOrName} {targetId}");
+            return hub.ExecuteConsoleCommand($"tele {playerIdOrName} {target}");
         }
 
         #endregion Teleport player

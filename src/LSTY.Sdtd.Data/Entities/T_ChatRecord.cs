@@ -4,7 +4,7 @@ using System;
 
 namespace LSTY.Sdtd.Data.Entities
 {
-    public class T_ChatLog : IEntity
+    public class T_ChatRecord : IEntity
     {
         [PrimaryKey, IgnoreUpdate, IgnoreInsert]
         public int Id { get; set; }
@@ -14,8 +14,11 @@ namespace LSTY.Sdtd.Data.Entities
 
         public int EntityId { get; set; }
 
+        public string SenderName { get; set; }
+
         public int ChatType { get; set; }
 
         public string Message { get; set; }
+
     }
 }

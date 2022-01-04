@@ -18,10 +18,10 @@ namespace LSTY.Sdtd.PatronsMod.Commands
         public override string GetHelp()
         {
             return "Usage:\n" +
-                "  1. ty-gi <SteamId/EntityId> <ItemName> <Count> <Quality> <Durability>\n" +
-                "  2. ty-gi <SteamId/EntityId> <ItemName> <Count> <Quality>\n" +
-                "  3. ty-gi <SteamId/EntityId> <ItemName> <Count>\n" +
-                "  4. ty-gi <SteamId/EntityId> <ItemName>\n" +
+                "  1. ty-gi <EOS/EntityId> <ItemName> <Count> <Quality> <Durability>\n" +
+                "  2. ty-gi <EOS/EntityId> <ItemName> <Count> <Quality>\n" +
+                "  3. ty-gi <EOS/EntityId> <ItemName> <Count>\n" +
+                "  4. ty-gi <EOS/EntityId> <ItemName>\n" +
                 "  5. ty-gi all <ItemName> <Count> <Quality> <Durability>\n " +
                 "  6. ty-gi all <ItemName> <Count> <Quality>\n " +
                 "  7. ty-gi all <ItemName> <Count>\n " +
@@ -91,7 +91,7 @@ namespace LSTY.Sdtd.PatronsMod.Commands
                         }
                     }
 
-                    ItemValue itemValue = new ItemValue(ItemClass.GetItem(arg1).type, min, max, true, null, 1);
+                    ItemValue itemValue = new ItemValue(ItemClass.GetItem(arg1).type, min, max, true, null);
                     if (itemValue != null)
                     {
                         if (argCount > 4 && float.TryParse(args[4], out float durability))

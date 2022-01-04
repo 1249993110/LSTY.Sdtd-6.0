@@ -4,7 +4,7 @@ using System;
 
 namespace LSTY.Sdtd.Data.Entities
 {
-    public class V_ChatLog : IEntity
+    public class V_ChatRecord : IEntity
     {
         public int Id { get; set; }
 
@@ -12,12 +12,14 @@ namespace LSTY.Sdtd.Data.Entities
 
         public int EntityId { get; set; }
 
+        public string SenderName { get; set; }
+
         public int ChatType { get; set; }
 
         public string Message { get; set; }
 
-        public string PlayerName { get; set; }
-
         public string PlatformUserId { get; set; }
+
+        public string EOS { get; set; }
     }
 }

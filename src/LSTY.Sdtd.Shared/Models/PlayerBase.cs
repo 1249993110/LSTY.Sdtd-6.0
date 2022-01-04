@@ -12,5 +12,6 @@ namespace LSTY.Sdtd.Shared.Models
         public string PlatformType { get; set; }
         public int EntityId { get; set; }
         public string Name { get; set; }
+        public string EOS { get; set; }
     }
 }
