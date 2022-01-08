@@ -19,10 +19,11 @@
 	  <None Include="appsettings.Development.json">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
+	  <None Include="LSTY.Sdtd.WebApi.crproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="IceCoffee.AspNetCore" Version="1.0.0.3" GeneratePathProperty="true" />
+		<PackageReference Include="IceCoffee.AspNetCore" Version="1.0.0.5" GeneratePathProperty="true" />
 	</ItemGroup>
 	
 	<Target Name="CopyXMLFromPackagesOnBuild" AfterTargets="Build">
@@ -35,7 +36,22 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\LSTY.Sdtd.Services\LSTY.Sdtd.Services.csproj" />
+		<PackageReference Include="Confuser.MSBuild" Version="1.5.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<Obfuscate>false</Obfuscate>
+		<!-- Default values. The following lines can be removed, unless they are changed. -->
+		<ConfuserReplaceOutput>true</ConfuserReplaceOutput>
+		<ConfuserProject>$(MSBuildProjectDirectory)\$(MSBuildProjectName).crproj</ConfuserProject>
+		<ConfuserKeyFile>$(AssemblyOriginatorKeyFile)</ConfuserKeyFile>
+		<ConfuserIntermediateOutputPath>$(IntermediateOutputPath)bin\confused\</ConfuserIntermediateOutputPath>
+		<!--<ConfuserOutDir>$(OutDir)confused\</ConfuserOutDir>-->
+		<ConfuserSymbolFileName>symbols.map</ConfuserSymbolFileName>
+	</PropertyGroup>
 
 	<ItemGroup>
 	  <None Update="Data\patrons.sql">
@@ -43,4 +59,5 @@
 	  </None>
 	</ItemGroup>
 
+	
 </Project>

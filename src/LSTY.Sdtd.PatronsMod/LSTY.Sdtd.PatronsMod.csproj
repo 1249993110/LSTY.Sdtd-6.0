@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Lib.Harmony" Version="2.1.1" />
+		<PackageReference Include="Lib.Harmony" Version="2.2.0" />
 		<PackageReference Include="Microsoft.AspNet.SignalR.SelfHost" Version="2.4.2" />
 	</ItemGroup>
 
@@ -95,6 +95,10 @@
 			<Private>true</Private>
 			<HintPath>$(SystemRoot)\Microsoft.NET\Framework64\v$(MSBuildRuntimeVersion)\System.Runtime.Serialization.dll</HintPath>
 		</Reference>
+		<Reference Include="System.ComponentModel.DataAnnotations">
+			<Private>true</Private>
+			<HintPath>$(SystemRoot)\Microsoft.NET\Framework64\v$(MSBuildRuntimeVersion)\System.ComponentModel.DataAnnotations.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -119,10 +123,10 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	<!--<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<PostBuildEvent>
 			cd /D "H:\steam\steamapps\common\7 Days to Die Dedicated Server"
 			powershell start-process -FilePath startdedicated.bat
 		</PostBuildEvent>
-	</PropertyGroup>
+	</PropertyGroup>-->
 </Project>

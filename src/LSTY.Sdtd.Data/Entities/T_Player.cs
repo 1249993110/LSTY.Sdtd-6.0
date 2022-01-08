@@ -37,6 +37,10 @@ namespace LSTY.Sdtd.Data.Entities
         [Column("[Level]")]
         public float Level { get; set; }
 
+        public int Health { get; set; }
+
+        public float Stamina { get; set; }
+
         public int Score { get; set; }
 
         public int ZombieKills { get; set; }

@@ -9,8 +9,6 @@ namespace LSTY.Sdtd.PatronsMod.Commands
 {
     public abstract class ConsoleCmdBase : ConsoleCmdAbstract
     {
-        protected const string DefaultServerName = "Server";
-
 		protected virtual void Log(string line)
         {
             SdtdConsole.Instance.Output(CustomLogger.Prefix + line);

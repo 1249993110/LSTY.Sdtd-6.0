@@ -40,10 +40,9 @@
         <div id="content"></div>
         <template>
             <div style="margin-top: 10px;">
-                <div style="display: inline-block; width: calc(100% - 103px);">
-                    <el-input placeholder="请输入内容" v-model="message" clearable @keyup.enter.native="sendMessage">
-                    </el-input>
-                </div>
+                <el-input style="display: inline-block; width: calc(100% - 103px);" placeholder="请输入内容"
+                    v-model="message" clearable @keyup.enter.native="sendMessage">
+                </el-input>
                 <el-button type="primary" @click="sendMessage">发送消息</el-button>
             </div>
         </template>
@@ -108,7 +107,7 @@
                         color = 'black';
                 }
 
-                if(chatMessage.entityId === -1){
+                if (chatMessage.entityId === -1) {
                     color = 'red';
                 }
 

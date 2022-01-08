@@ -39,10 +39,9 @@
         <div id="content"></div>
         <template>
             <div style="margin-top: 10px;">
-                <div style="display: inline-block; width: calc(100% - 103px);">
-                    <el-input placeholder="请输入内容" v-model="command" clearable @keyup.enter.native="sendCommand">
-                    </el-input>
-                </div>
+                <el-input style="display: inline-block; width: calc(100% - 103px);" placeholder="请输入内容"
+                    v-model="command" clearable @keyup.enter.native="sendCommand">
+                </el-input>
                 <el-button type="primary" @click="sendCommand">发送命令</el-button>
             </div>
         </template>

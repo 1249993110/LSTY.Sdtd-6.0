@@ -15,23 +15,21 @@ namespace LSTY.Sdtd.Services.Managers
         private readonly IPlayerRepository _playerRepository;
         private readonly IInventoryRepository _inventoryRepository;
         private readonly IChatRecordRepository _chatRecordRepository;
-        private readonly ILivePlayers _livePlayers;
 
         public PersistentManager(ILogger<PersistentManager> logger,
             SignalRManager signalRManager,
             IPlayerRepository playerRepository,
             IInventoryRepository inventoryRepository,
-            IChatRecordRepository chatRecordRepository,
+            IChatRecordRepository chatRecordRepository, 
             ILivePlayers livePlayers)
         {
             _logger = logger;
             _serverManageHub = signalRManager.ServerManageHub;
-            signalRManager.ModEventHookHub.SavePlayerData += OnSavePlayerData;
             signalRManager.ModEventHookHub.ChatMessage += OnChatMessage;
             _playerRepository = playerRepository;
             _inventoryRepository = inventoryRepository;
             _chatRecordRepository = chatRecordRepository;
-            _livePlayers = livePlayers;
+            livePlayers.PlayerUpdate += SavePlayerData;
         }
 
         private void OnChatMessage(ChatMessage chatMessage)
@@ -62,11 +60,13 @@ namespace LSTY.Sdtd.Services.Managers
                     EntityId = livePlayer.EntityId,
                     IP = livePlayer.IP,
                     LastOnline = DateTime.Now,
-                    LastPositionX = livePlayer.LastPosition.X,
-                    LastPositionY = livePlayer.LastPosition.Y,
-                    LastPositionZ = livePlayer.LastPosition.Z,
+                    LastPositionX = livePlayer.Position.X,
+                    LastPositionY = livePlayer.Position.Y,
+                    LastPositionZ = livePlayer.Position.Z,
                     Name = livePlayer.Name,
                     Level = livePlayer.Level,
+                    Health = livePlayer.Health,
+                    Stamina = livePlayer.Stamina,
                     PlatformType = livePlayer.PlatformType,
                     PlatformUserId = livePlayer.PlatformUserId,
                     PlayerKills = livePlayer.PlayerKills,
@@ -81,27 +81,35 @@ namespace LSTY.Sdtd.Services.Managers
                 _logger.LogError(ex, "Error in PersistentManager.SaveLivePlayer");
             }
         }
-        private void SaveInventory(int entityId)
+        
+        private async Task SaveInventory()
         {
             try
             {
-                var inventory = _serverManageHub.GetLivePlayerInventory(entityId).Result;
-
-                if (inventory == null)
+                var playerInventories = await _serverManageHub.GetPlayerInventories();
+                foreach (var playerInventory in playerInventories)
                 {
-                    return;
+                    try
+                    {
+                        if (playerInventory.Inventory != null)
+                        {
+                            var serializedContent = JsonSerializer.Serialize(playerInventory.Inventory, new JsonSerializerOptions()
+                            {
+                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                            });
+
+                            _inventoryRepository.ReplaceInto(new Data.Entities.T_Inventory()
+                            {
+                                EntityId = playerInventory.EntityId,
+                                SerializedContent = serializedContent
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error in PersistentManager.SaveInventory:foreach");
+                    }
                 }
-
-                var serializedContent = JsonSerializer.Serialize(inventory, new JsonSerializerOptions()
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
-
-                _inventoryRepository.ReplaceInto(new Data.Entities.T_Inventory()
-                {
-                    EntityId = entityId,
-                    SerializedContent = serializedContent
-                });
             }
             catch (Exception ex)
             {
@@ -109,15 +117,16 @@ namespace LSTY.Sdtd.Services.Managers
             }
         }
 
-        private void OnSavePlayerData(LivePlayer livePlayer)
+        public void SavePlayerData(IEnumerable<LivePlayer> livePlayers)
         {
-            if (livePlayer.EntityId < 0 || string.IsNullOrEmpty(livePlayer.IP))
-            {
-                return;
-            }
+            // 保存玩家背包
+            Task.Run(SaveInventory);
 
-            SaveLivePlayer(livePlayer);
-            SaveInventory(livePlayer.EntityId);
+            // 保存玩家
+            foreach (var livePlayer in livePlayers)
+            {
+                SaveLivePlayer(livePlayer);
+            }
         }
     }
 }

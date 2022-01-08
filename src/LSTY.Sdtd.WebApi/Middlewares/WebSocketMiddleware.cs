@@ -46,8 +46,8 @@ namespace LSTY.Sdtd.WebApi.Middlewares
             _clients = new ConcurrentDictionary<string, WebSocket>();
             signalRManager.ModEventHookHub.LogCallback += On_ModEventHookHub_LogCallback;
             signalRManager.ModEventHookHub.ChatMessage += On_ModEventHookHub_ChatMessage;
-            signalRManager.ModEventHookHub.SavePlayerData += On_ModEventHookHub_SavePlayerData;
             _livePlayers = livePlayers;
+            livePlayers.PlayerUpdate += On_ModEventHookHub_PlayerUpdate;
         }
 
 
@@ -69,12 +69,12 @@ namespace LSTY.Sdtd.WebApi.Middlewares
             });
         }
 
-        private void On_ModEventHookHub_SavePlayerData(LivePlayer livePlayer)
+        private void On_ModEventHookHub_PlayerUpdate(IEnumerable<LivePlayer> livePlayers)
         {
             SendMessageToAllClients(new WebSocketMessage()
             {
                 MessageType = Shared.Models.WebSocketMessageType.PlayerUpdate,
-                MessageEntity = _livePlayers.Values
+                MessageEntity = livePlayers
             });
         }
 
@@ -154,7 +154,7 @@ namespace LSTY.Sdtd.WebApi.Middlewares
                             string connectionId = context.Connection.Id;
                             var socketFinishedTcs = new TaskCompletionSource();
 
-                            _logger.LogInformation("WebSocket connection started, connection Id: " + connectionId);
+                            _logger.LogInformation($"WebSocket connection started, connection Id: {connectionId}, remoteIP: {context.Connection.RemoteIpAddress}");
 
                             await Task.Factory.StartNew(RecvLoop, new RecvLoopEntry()
                             {

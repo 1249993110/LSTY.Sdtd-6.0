@@ -4,7 +4,6 @@ using IceCoffee.AspNetCore.Authorization;
 using IceCoffee.AspNetCore.Extensions;
 using IceCoffee.AspNetCore.Middlewares;
 using IceCoffee.AspNetCore.Models.Primitives;
-using IceCoffee.AspNetCore.Resources;
 using IceCoffee.DbCore;
 using IceCoffee.DbCore.Utils;
 using LSTY.Sdtd.Data;
@@ -124,7 +123,7 @@ namespace LSTY.Sdtd.WebApi
              {
                  options.DataAnnotationLocalizerProvider = (type, factory) =>
                  {
-                     return factory.Create(typeof(DataAnnotationsResource));
+                     return factory.Create(typeof(IceCoffee.DataAnnotations.Resource));
                  };
              });
 

@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS T_Player(
 	LastPositionY INTEGER,				--Y坐标
 	LastPositionZ INTEGER,				--Z坐标
 	[Level] REAL,						--等级
+	Health INTEGER,						--生命值
+	Stamina REAL,						--耐力
 	Score INTEGER,						--评分
 	ZombieKills INTEGER,				--击杀僵尸
 	PlayerKills INTEGER,				--击杀玩家

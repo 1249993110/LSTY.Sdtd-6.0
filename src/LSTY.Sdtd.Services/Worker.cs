@@ -37,6 +37,9 @@ namespace LSTY.Sdtd.Services
                     // 连接 SignalR 服务端
                     await _signalRManager.ConnectAsync();
 
+                    // 加载在线玩家
+                    _serviceProvider.GetRequiredService<ILivePlayers>();
+
                     // 加载持久化控制器
                     _serviceProvider.GetRequiredService<PersistentManager>();
 

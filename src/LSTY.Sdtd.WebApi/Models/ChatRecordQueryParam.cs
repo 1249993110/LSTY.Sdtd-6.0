@@ -1,4 +1,5 @@
 ﻿using IceCoffee.AspNetCore.Models.RequestParams;
+using IceCoffee.DataAnnotations;
 using NSwag.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;

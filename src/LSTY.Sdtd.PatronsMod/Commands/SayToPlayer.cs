@@ -51,7 +51,7 @@ namespace LSTY.Sdtd.PatronsMod.Commands
         {
             if (args.Count < 2)
             {
-                Log("Usage: sayplayer <entityId|platformUserId|playerName> <message>");
+                Log("Usage: sayplayer <EOS/EntityId/PlayerName> <message>");
                 return;
             }
 
@@ -60,11 +60,11 @@ namespace LSTY.Sdtd.PatronsMod.Commands
             ClientInfo receiver = ConsoleHelper.ParseParamIdOrName(args[0]);
             if (receiver == null)
             {
-                Log("EntityId or platformUserId or playerName not found.");
+                Log("EOS or entityId or playerName not found.");
             }
             else
             {
-                string senderName = (args.Count < 3 || string.IsNullOrEmpty(args[2])) ? DefaultServerName : args[2];
+                string senderName = (args.Count < 3 || string.IsNullOrEmpty(args[2])) ? ExportedConstants.DefaultServerName : args[2];
                 SendMessage(receiver, sender, message, senderName);
             }
         }

@@ -22,8 +22,13 @@
 <body>
     <div id="app">
         <template>
-            <el-table :data="tableData" border style="width: 100%" :height="tableHeight" highlight-current-row
-                ref="table" @row-contextmenu="onContextmenu">
+            <div>
+                <el-input style="display: inline-block; width: 300px;" v-model="pagination.keyword"
+                    placeholder clearable size="small" @keyup.enter.native="search"></el-input>
+                <el-button type="primary" @click="search" prefix-icon="el-icon-search" size="small">查 询</el-button>
+            </div>
+            <el-table :data="tableData" border :height="tableHeight" highlight-current-row ref="table" style="margin-top: 8px;"
+                @row-contextmenu="onContextmenu">
                 <el-table-column type="index" width="60">
                 </el-table-column>
                 <el-table-column prop="entityId" label="实体Id" width="88" sortable>
@@ -34,8 +39,7 @@
                 </el-table-column>
                 <el-table-column prop="platformType" label="平台类型" width="77">
                 </el-table-column>
-                <el-table-column prop="lastOnline" label="上次在线" width="160" :formatter="format_lastOnline"
-                    sortable>
+                <el-table-column prop="lastOnline" label="上次在线" width="160" :formatter="format_lastOnline" sortable>
                 </el-table-column>
                 <el-table-column prop="totalPlayTime" label="总游戏时长" width="115" :formatter="format_totalPlayTime"
                     sortable>
@@ -57,6 +61,11 @@
                 <el-table-column prop="eos" label="EOS" sortable>
                 </el-table-column>
             </el-table>
+            <el-pagination style="margin-top: 8px;" v-on:size-change="onPageSizeChange"
+                v-on:current-change="onCurrentPageChange" v-bind:page-sizes="[10, 20, 50, 100]"
+                v-bind:current-page="pagination.currentPage" v-bind:page-size="pagination.pageSize"
+                v-bind:total="pagination.total" layout="total, sizes, prev, pager, next, jumper">
+            </el-pagination>
         </template>
     </div>
 </body>
@@ -74,21 +83,34 @@
         el: "#app",
         data() {
             return {
-                tableHeight: document.body.clientHeight,
+                tableHeight: document.body.clientHeight - 80,
                 tableData: [],
+                pagination: {
+                    currentPage: 1,
+                    pageSize: 20,
+                    total: 0,
+                    keyword: '',
+                },
             };
         },
         created() {
             this.getHistoryPlayers();
             window.onresize = () => {
-                this.tableHeight = document.body.clientHeight;
+                this.tableHeight = document.body.clientHeight - 80;
             };
         },
         methods: {
+            search() {
+                this.getHistoryPlayers();
+            },
             showMessage(message) {
                 top.Vue.prototype.$message.success(message);
             },
             formatMinute(totalMinute) {
+                if(totalMinute < 1){
+                    return '小于 1 分钟';
+                }
+
                 const day = parseInt(totalMinute / 60 / 24);
                 const hour = parseInt(totalMinute / 60 % 24);
                 const minute = parseInt(totalMinute % 60);
@@ -105,8 +127,15 @@
                 return result;
             },
             getHistoryPlayers() {
-                api.getHistoryPlayers().then((response) => {
-                    this.tableData = response.data.data;
+                const params = {
+                    pageIndex: this.pagination.currentPage,
+                    pageSize: this.pagination.pageSize,
+                    desc: true,
+                    idOrName: this.pagination.keyword
+                };
+                api.getHistoryPlayers(params).then((response) => {
+                    this.tableData = response.data.data.items;
+                    this.pagination.total = response.data.data.total;
                 });
             },
             onContextmenu(row, column, event) {
@@ -206,7 +235,15 @@
             },
             format_lastPosition(row) {
                 return `${row.lastPositionX} ${row.lastPositionY} ${row.lastPositionZ}`;
-            }
+            },
+            onPageSizeChange(val) {
+                this.pagination.pageSize = val;
+                this.getHistoryPlayers();
+            },
+            onCurrentPageChange(val) {
+                this.pagination.currentPage = val;
+                this.getHistoryPlayers();
+            },
         }
     });
 </script>

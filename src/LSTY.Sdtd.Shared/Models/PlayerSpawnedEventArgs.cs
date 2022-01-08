@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace LSTY.Sdtd.Shared.Models
 {
-    public class PlayerSpawnedEventArgs
+    public class PlayerSpawnedEventArgs : PlayerBase
     {
-        public int EntityId { get; set; }
-
         public RespawnType RespawnType { get; set; }
 
         public Position Position { get; set; }

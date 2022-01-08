@@ -49,7 +49,7 @@
                 </el-table-column>
                 <el-table-column prop="level" label="等级" width="73" sortable>
                 </el-table-column>
-                <el-table-column prop="lastPosition" label="玩家坐标" width="128" :formatter="format_lastPosition">
+                <el-table-column prop="position" label="玩家坐标" width="128" :formatter="format_position">
                 </el-table-column>
                 <el-table-column prop="zombieKills" label="击杀僵尸" width="101" sortable>
                 </el-table-column>
@@ -104,6 +104,10 @@
                 top.Vue.prototype.$message.success(message);
             },
             formatMinute(totalMinute) {
+                if(totalMinute < 1){
+                    return '小于 1 分钟';
+                }
+
                 const day = parseInt(totalMinute / 60 / 24);
                 const hour = parseInt(totalMinute / 60 % 24);
                 const minute = parseInt(totalMinute % 60);
@@ -290,8 +294,8 @@
                 const value = row.totalPlayTime;
                 return this.formatMinute(value);
             },
-            format_lastPosition(row) {
-                const value = row.lastPosition;
+            format_position(row) {
+                const value = row.position;
                 return `${value.x} ${value.y} ${value.z}`;
             },
             format_landProtectionActive(row) {

@@ -17,9 +17,9 @@ using System.Text.Json;
 namespace LSTY.Sdtd.WebApi.Controllers
 {
     /// <summary>
-    /// Players
+    /// 玩家
     /// </summary>
-    [Route("[controller]/[action]")]
+    [Route("[action]")]
     public class PlayersController : ApiControllerBase
     {
         private readonly ILogger<PlayersController> _logger;
@@ -53,7 +53,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
             IEnumerable<LivePlayer> data = null;
             if (realTime)
             {
-                data = await _serverManageHub.GetLivePlayers();
+                data = await _serverManageHub.GetPlayers();
             }
             else
             {
@@ -75,7 +75,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         {
             if (realTime)
             {
-                var player = await _serverManageHub.GetLivePlayer(entityId);
+                var player = await _serverManageHub.GetPlayer(entityId);
                 if (player == null)
                 {
                     goto _Return;
@@ -107,7 +107,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
             Inventory data = null;
             if (_livePlayers.ContainsPlayer(entityId))
             {
-                data = await _serverManageHub.GetLivePlayerInventory(entityId);
+                data = await _serverManageHub.GetPlayerInventory(entityId);
 
                 return SucceededResult(data);
             }
@@ -127,30 +127,36 @@ namespace LSTY.Sdtd.WebApi.Controllers
         }
 
         /// <summary>
-        /// 获取所有历史玩家
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [SucceededResponseType(typeof(IEnumerable<T_Player>))]
-        public async Task<IResponse> HistoryPlayers()
-        {
-            IEnumerable<T_Player> data = await _playerRepository.QueryAllAsync();
-
-            return SucceededResult(data);
-        }
-
-        /// <summary>
-        /// 分页搜索历史玩家
+        /// 获取历史玩家
         /// </summary>
         /// <param name="models"></param>
         /// <returns></returns>
         [HttpGet]
         [SucceededResponseType(typeof(PaginationQueryResult<T_Player>))]
-        public async Task<IResponse> HistoryPlayersPaged([FromQuery] HistoryPlayersQueryParam models)
+        public async Task<IResponse> HistoryPlayers([FromQuery] HistoryPlayersQueryParam models)
         {
             var data = await _playerRepository.QueryPagedAsync(models.Adapt<PlayersQueryDto>());
 
             return PaginationQueryResult(data.Items, data.Total);
+        }
+
+        /// <summary>
+        /// 获取指定历史玩家
+        /// </summary>
+        /// <param name="entityId">指定玩家的实体Id</param>
+        /// <returns></returns>
+        [HttpGet("{entityId}")]
+        [SucceededResponseType(typeof(T_Player))]
+        public async Task<IResponse> HistoryPlayers(int entityId)
+        {
+            var player = await _playerRepository.QueryByIdAsync(nameof(T_Player.EntityId), entityId);
+
+            if(player?.Any() == false)
+            {
+                return FailedResult($"Player {entityId} not found");
+            }
+
+            return SucceededResult(player.First());
         }
     }
 }

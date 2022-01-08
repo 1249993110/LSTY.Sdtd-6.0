@@ -22,7 +22,12 @@
 <body>
     <div id="app">
         <template>
-            <el-table :data="tableData" border style="width: 100%" :height="tableHeight" highlight-current-row
+            <div>
+                <el-input style="display: inline-block; width: 300px;" v-model="pagination.keyword"
+                    placeholder clearable size="small" @keyup.enter.native="search"></el-input>
+                <el-button type="primary" @click="search" prefix-icon="el-icon-search" size="small">查 询</el-button>
+            </div>
+            <el-table :data="tableData" border style="margin-top: 8px;" :height="tableHeight" highlight-current-row
                 ref="table">
                 <el-table-column type="index" width="60">
                 </el-table-column>
@@ -38,7 +43,7 @@
                 </el-table-column>
                 <el-table-column prop="platformUserId" label="平台Id" width="162" sortable>
                 </el-table-column>
-                <el-table-column prop="eos" label="EOS" width="280" sortable>
+                <el-table-column prop="eos" label="EOS" width="300" sortable>
                 </el-table-column>
             </el-table>
             <el-pagination style="margin-top: 8px;" v-on:size-change="onPageSizeChange" v-on:current-change="onCurrentPageChange"
@@ -63,22 +68,26 @@
         el: "#app",
         data() {
             return {
-                tableHeight: document.body.clientHeight - 40,
+                tableHeight: document.body.clientHeight - 80,
                 tableData: [],
                 pagination: {
                     currentPage: 1,
                     pageSize: 20,
                     total: 0,
+                    keyword: '',
                 },
             };
         },
         created() {
             this.getChatRecord();
             window.onresize = () => {
-                this.tableHeight = document.body.clientHeight - 40;
+                this.tableHeight = document.body.clientHeight - 80;
             };
         },
         methods: {
+            search() {
+                this.getChatRecord();
+            },
             showMessage(message) {
                 top.Vue.prototype.$message.success(message);
             },
@@ -86,7 +95,8 @@
                 const params = {
                     pageIndex: this.pagination.currentPage,
                     pageSize: this.pagination.pageSize,
-                    desc: true
+                    desc: true,
+                    idOrName: this.pagination.keyword
                 };
                 api.getChatRecord(params).then((response) => {
                     this.tableData = response.data.data.items;

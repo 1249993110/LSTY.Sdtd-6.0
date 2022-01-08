@@ -88,7 +88,7 @@ namespace LSTY.Sdtd.PatronsMod
                 ModEvents.PlayerSpawnedInWorld.RegisterHandler(ModEventHook.PlayerSpawnedInWorld);
                 ModEvents.EntityKilled.RegisterHandler(ModEventHook.EntityKilled);
                 ModEvents.PlayerDisconnected.RegisterHandler(ModEventHook.PlayerDisconnected);
-                ModEvents.SavePlayerData.RegisterHandler(ModEventHook.SavePlayerData);
+                // ModEvents.SavePlayerData.RegisterHandler(ModEventHook.SavePlayerData);
                 ModEvents.ChatMessage.RegisterHandler(ModEventHook.ChatMessage);
                 ModEvents.PlayerSpawning.RegisterHandler(ModEventHook.PlayerSpawning);
 

@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LSTY.Sdtd.WebApi.Controllers
 {
     /// <summary>
-    /// ChatRecord
+    /// 聊天记录
     /// </summary>
     [Route("[controller]")]
     public class ChatRecordController : ApiControllerBase
@@ -27,7 +27,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         }
 
         /// <summary>
-        /// 分页搜索聊天记录
+        /// 获取聊天记录
         /// </summary>
         /// <param name="models"></param>
         /// <returns></returns>

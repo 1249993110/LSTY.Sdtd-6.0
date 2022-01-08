@@ -52,19 +52,21 @@ api.addAdmin = function (playerIdOrName, level, displayName) {
 }
 
 api.getLivePlayers = function (realTime = false) {
-    return axios.get('/Players/LivePlayers' + (realTime ? '?realTime=true' : ''));
+    return axios.get('/LivePlayers' + (realTime ? '?realTime=true' : ''));
 }
 
 api.getLivePlayer = function (playerEntityId, realTime = false) {
-    return axios.get('/Players/LivePlayers/' + playerEntityId + (realTime ? '?realTime=true' : ''));
+    return axios.get('/LivePlayers/' + playerEntityId + (realTime ? '?realTime=true' : ''));
 }
 
 api.getPlayerInventory = function (playerEntityId) {
-    return axios.get('/Players/PlayerInventory/' + playerEntityId);
+    return axios.get('/PlayerInventory/' + playerEntityId);
 }
 
-api.getHistoryPlayers = function () {
-    return axios.get('/Players/HistoryPlayers');
+api.getHistoryPlayers = function (params) {
+    return axios.get('/HistoryPlayers', {
+        params: params
+    });
 }
 
 api.getChatRecord = function (params) {

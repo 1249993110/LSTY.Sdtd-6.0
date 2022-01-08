@@ -63,12 +63,21 @@ namespace LSTY.Sdtd.Services.Functions
 
         protected void SendGlobalMessage(string message)
         {
-            ServerManageHub.SendGlobalMessage(message, FunctionSettings.ServerName).Wait();
+            ServerManageHub.SendGlobalMessage(new GlobalMessage() 
+            {
+                Message = $"\"{message}\"",
+                SenderName = FunctionSettings.ServerName
+            }).Wait();
         }
 
         protected void SendMessageToPlayer(object playerIdOrName, string message)
         {
-            ServerManageHub.SendMessageToPlayer(playerIdOrName, message, FunctionSettings.ServerName).Wait();
+            ServerManageHub.SendPrivateMessage(new PrivateMessage() 
+            {
+                TargetPlayerIdOrName = playerIdOrName.ToString(),
+                Message = $"\"{message}\"",
+                SenderName = FunctionSettings.ServerName
+            }).Wait();
         }
 
         /// <summary>

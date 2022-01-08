@@ -30,5 +30,7 @@ namespace LSTY.Sdtd.Services
         event Action ServerNonePlayer;
 
         event Action ServerHavePlayerAgain;
+
+        event Action<IEnumerable<LivePlayer>> PlayerUpdate;
     }
 }

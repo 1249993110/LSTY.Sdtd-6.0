@@ -101,7 +101,17 @@ namespace LSTY.Sdtd.PatronsMod.Extensions
                 //    inventoryCheck.Execute(steamId, name, count, maxAllowed);
                 //}
 
-                int quality = itemValue.HasQuality ? itemValue.Quality : -1;
+                int quality = 0;
+                string qualityColor = null;
+                if (itemValue.HasQuality)
+                {
+                    quality = itemValue.Quality;
+                    qualityColor = QualityInfo.GetQualityColorHex(quality);
+                }
+                else
+                {
+                    quality = -1;
+                }
 
                 InvItem item = new InvItem()
                 {
@@ -110,6 +120,7 @@ namespace LSTY.Sdtd.PatronsMod.Extensions
                     Quality = quality,
                     Icon = itemClass.GetIconName(),
                     IconColor = itemClass.GetIconTint().ToHex(),
+                    QualityColor = qualityColor,
                     MaxUseTimes = itemValue.MaxUseTimes,
                     UseTimes = itemValue.UseTimes
                 };

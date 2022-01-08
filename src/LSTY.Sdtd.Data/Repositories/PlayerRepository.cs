@@ -55,13 +55,24 @@ namespace LSTY.Sdtd.Data.Repositories
             string whereBy = null;
             if (string.IsNullOrEmpty(dto.IdOrName) == false)
             {
-                whereBy = "EntityId=@IdOrName OR PlatformUserId=@IdOrName OR EOS=@IdOrName OR SenderName LIKE '%'||@IdOrName||'%'";
+                whereBy = "EntityId=@IdOrName OR PlatformUserId=@IdOrName OR EOS=@IdOrName OR Name LIKE '%'||@IdOrName||'%'";
             }
 
             var items = await base.QueryPagedAsync(dto.PageIndex, dto.PageSize, whereBy, orderBy, dto);
             uint total = await base.QueryRecordCountAsync(whereBy, dto);
 
             return new PaginationResultDto() { Items = items, Total = total };
+        }
+
+        public async Task<IEnumerable<PlayerLocationDto>> QueryPlayersLocation(IEnumerable<int> filterEntitiyIds)
+        {
+            if (filterEntitiyIds == null)
+            {
+                throw new ArgumentNullException(nameof(filterEntitiyIds));
+            }
+
+            string sql = "SELECT EntityId,Name,LastPositionX,LastPositionY,LastPositionZ FROM T_Player WHERE EntityId NOT IN @FilterEntitiyIds";
+            return await base.QueryAsync<PlayerLocationDto>(sql, new { FilterEntitiyIds = filterEntitiyIds });
         }
     }
 }

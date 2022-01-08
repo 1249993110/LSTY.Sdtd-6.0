@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LSTY.Sdtd.Shared;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace LSTY.Sdtd.PatronsMod.Commands
 			return "Usage:\n" +
 			   "  1. ty-gm <Message>\n" +
 			   "  2. ty-gm <Message> <SenderName>\n" +
-			   "1. Sends a message to all connected clients by default server name: " + DefaultServerName + "\n" +
+			   "1. Sends a message to all connected clients by default server name: " + ExportedConstants.DefaultServerName + "\n" +
 			   "2. Sends a message to all connected clients by sender name";
 		}
 
@@ -36,7 +37,7 @@ namespace LSTY.Sdtd.PatronsMod.Commands
 			}
 
 			string message = args[0];
-			string senderName = (args.Count < 2 || string.IsNullOrEmpty(args[1])) ? DefaultServerName : args[1];
+			string senderName = (args.Count < 2 || string.IsNullOrEmpty(args[1])) ? ExportedConstants.DefaultServerName : args[1];
 
 			GameManager.Instance.ChatMessageServer(ModApi.GetCmdExecuteDelegate(), EChatType.Global, -1, message, senderName, false, null);
 		}

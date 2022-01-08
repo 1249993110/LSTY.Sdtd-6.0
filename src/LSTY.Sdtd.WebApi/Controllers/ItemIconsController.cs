@@ -17,7 +17,7 @@ using System.Text.Json;
 namespace LSTY.Sdtd.WebApi.Controllers
 {
     /// <summary>
-    /// ItemIcons
+    /// 物品图标
     /// </summary>
     [Route("[controller]")]
     public class ItemIconsController : ApiControllerBase

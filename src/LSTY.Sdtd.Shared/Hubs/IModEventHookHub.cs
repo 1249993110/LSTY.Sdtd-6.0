@@ -18,9 +18,9 @@ namespace LSTY.Sdtd.Shared.Hubs
 
         void OnPlayerDisconnected(int entityId);
 
-        void OnSavePlayerData(LivePlayer livePlayer);
+        //void OnSavePlayerData(PlayerBase playerBase);
 
-        void OnPlayerSpawning(LivePlayer livePlayer);
+        void OnPlayerSpawning(PlayerBase playerBase);
 
         void OnPlayerSpawnedInWorld(PlayerSpawnedEventArgs playerSpawnedEventArgs);
 

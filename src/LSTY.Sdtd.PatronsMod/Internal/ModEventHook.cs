@@ -88,14 +88,9 @@ namespace LSTY.Sdtd.PatronsMod.Internal
         /// <param name="position"></param>
         public static void PlayerSpawnedInWorld(ClientInfo clientInfo, RespawnType respawnType, Vector3i position)
         {
-            var obj = new PlayerSpawnedEventArgs()
-            {
-                EntityId = clientInfo.entityId,
-                RespawnType = (Shared.Models.RespawnType)respawnType,
-                Position = position.ToPosition()
-            };
+            var obj = clientInfo.ToPlayerSpawnedEventArgs(respawnType, position);
 
-            Task.Factory.StartNew((state) => { _hub.OnPlayerSpawnedInWorld((PlayerSpawnedEventArgs)state); }, obj);
+            Task.Factory.StartNew((state) => _hub.OnPlayerSpawnedInWorld((PlayerSpawnedEventArgs)state), obj);
         }
 
         public static void EntityKilled(Entity killedEntity, Entity entityThatKilledMe)
@@ -194,10 +189,10 @@ namespace LSTY.Sdtd.PatronsMod.Internal
         /// <param name="pdf"></param>
         public static void SavePlayerData(ClientInfo clientInfo, PlayerDataFile pdf)
         {
-            Task.Factory.StartNew((state) =>
-            {
-                _hub.OnSavePlayerData(((ClientInfo)state).ToLivePlayer());
-            }, clientInfo);
+            //Task.Factory.StartNew((state) =>
+            //{
+            //    _hub.OnSavePlayerData(((ClientInfo)state).ToPlayerBase());
+            //}, clientInfo);
         }
 
         /// <summary>
@@ -210,7 +205,7 @@ namespace LSTY.Sdtd.PatronsMod.Internal
         {
             Task.Factory.StartNew((state) =>
             {
-                _hub.OnPlayerSpawning(((ClientInfo)state).ToLivePlayer(true));
+                _hub.OnPlayerSpawning(((ClientInfo)state).ToPlayerBase());
             }, clientInfo);
         }
 

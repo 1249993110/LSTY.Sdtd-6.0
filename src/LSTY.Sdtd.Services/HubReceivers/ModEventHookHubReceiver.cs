@@ -28,8 +28,8 @@ namespace LSTY.Sdtd.Services.HubReceivers
         public event Action GameStartDone;
 
         public event Action<int> PlayerDisconnected;
-        public event Action<LivePlayer> SavePlayerData;
-        public event Action<LivePlayer> PlayerSpawning;
+        //public event Action<PlayerBase> SavePlayerData;
+        public event Action<PlayerBase> PlayerSpawning;
         public event Action<PlayerSpawnedEventArgs> PlayerSpawnedInWorld;
         public event Action<Entity, int> EntityKilled;
 
@@ -50,7 +50,7 @@ namespace LSTY.Sdtd.Services.HubReceivers
             _hubProxy.On<Entity>(hub.OnEntitySpawned);
             _hubProxy.On<ChatMessage>(hub.OnChatMessage);
             _hubProxy.On<int>(hub.OnPlayerDisconnected);
-            _hubProxy.On<LivePlayer>(hub.OnSavePlayerData);
+            //_hubProxy.On<LivePlayer>(hub.OnSavePlayerData);
             _hubProxy.On<LivePlayer>(hub.OnPlayerSpawning);
             _hubProxy.On<PlayerSpawnedEventArgs>(hub.OnPlayerSpawnedInWorld);
             _hubProxy.On<Entity, int>(hub.OnEntityKilled);
@@ -111,19 +111,19 @@ namespace LSTY.Sdtd.Services.HubReceivers
             }
         }
 
-        void IModEventHookHub.OnSavePlayerData(LivePlayer livePlayer)
-        {
-            if (SavePlayerData != null)
-            {
-                Task.Run(() => SavePlayerData.Invoke(livePlayer));
-            }
-        }
+        //void IModEventHookHub.OnSavePlayerData(PlayerBase playerBase)
+        //{
+        //    if (SavePlayerData != null)
+        //    {
+        //        Task.Run(() => SavePlayerData.Invoke(playerBase));
+        //    }
+        //}
 
-        void IModEventHookHub.OnPlayerSpawning(LivePlayer livePlayer)
+        void IModEventHookHub.OnPlayerSpawning(PlayerBase playerBase)
         {
             if (PlayerSpawning != null)
             {
-                Task.Run(() => PlayerSpawning.Invoke(livePlayer));
+                Task.Run(() => PlayerSpawning.Invoke(playerBase));
             }
         }
 

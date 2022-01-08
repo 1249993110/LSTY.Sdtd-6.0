@@ -61,8 +61,7 @@ namespace LSTY.Sdtd.Services.Functions
                     case RespawnType.EnterMultiplayer:
                     // Old player spawning
                     case RespawnType.JoinMultiplayer:
-                        SendMessageToPlayer(playerSpawnedEventArgs.EntityId, 
-                            FormatCmd(_settings.WelcomeNotice, LivePlayers[playerSpawnedEventArgs.EntityId]));
+                        SendMessageToPlayer(playerSpawnedEventArgs.EntityId, FormatCmd(_settings.WelcomeNotice, playerSpawnedEventArgs));
                         break;
                 }
             }

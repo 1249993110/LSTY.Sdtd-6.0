@@ -16,5 +16,7 @@ namespace LSTY.Sdtd.Data.IRepositories
         IEnumerable<T_Player> QueryByEOS(string EOS);
 
         Task<PaginationResultDto> QueryPagedAsync(PlayersQueryDto dto);
+
+        Task<IEnumerable<PlayerLocationDto>> QueryPlayersLocation(IEnumerable<int> filterEntitiyIds);
     }
 }

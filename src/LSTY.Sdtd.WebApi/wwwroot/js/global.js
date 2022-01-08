@@ -1,6 +1,6 @@
 if(window.top === window.self){
 
-    window.accessToken = '';
+    window.accessToken = 'IuQQ7jwuYc';
 
     top.NProgress.configure({ showSpinner: false });
     
