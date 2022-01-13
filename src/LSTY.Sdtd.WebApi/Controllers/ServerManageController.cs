@@ -413,7 +413,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [SucceededResponseType(typeof(LandClaims))]
-        public async Task<IResponse> GetLandClaims()
+        public async Task<IResponse> LandClaims()
         {
             var data = await _serverManageHub.GetLandClaims();
             return SucceededResult(data);
@@ -426,7 +426,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [SucceededResponseType(typeof(ClaimOwner))]
-        public async Task<IResponse> GetLandClaim(int entityId)
+        public async Task<IResponse> LandClaim(int entityId)
         {
             var data = await _serverManageHub.GetLandClaim(entityId);
             return SucceededResult(data);
@@ -440,7 +440,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [SucceededResponseType(typeof(ItemBlockPaged))]
-        public async Task<IResponse> GetItemBlocks(int pageIndex = 1, int pageSzie = 10)
+        public async Task<IResponse> ItemBlocks(int pageIndex = 1, int pageSzie = 10)
         {
             var data = await _serverManageHub.GetItemBlocks(pageIndex, pageSzie);
             return SucceededResult(data);
@@ -453,7 +453,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [SucceededResponseType(typeof(IDictionary<string, string>))]
-        public async Task<IResponse> GetLocalization(string language = "schinese")
+        public async Task<IResponse> Localization(string language = "schinese")
         {
             var data = await _serverManageHub.GetLocalization(language);
             return SucceededResult(data);
@@ -465,10 +465,10 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <param name="itemName"></param>
         /// <param name="language"></param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet("{itemName}")]
         [SucceededResponseType(typeof(string))]
-        public async Task<IResponse> GetLocalization(
-            [Required(ErrorMessage = Resource.RequiredAttribute_ValidationError)]string itemName, 
+        public async Task<IResponse> Localization(
+            [FromRoute][Required(ErrorMessage = Resource.RequiredAttribute_ValidationError)]string itemName, 
             string language = "schinese")
         {
             var data = await _serverManageHub.GetLocalization(itemName, language);
@@ -481,7 +481,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [SucceededResponseType(typeof(IEnumerable<string>))]
-        public async Task<IResponse> GetKnownLanguages()
+        public async Task<IResponse> KnownLanguages()
         {
             var data = await _serverManageHub.GetKnownLanguages();
             return SucceededResult(data);

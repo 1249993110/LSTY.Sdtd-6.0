@@ -133,12 +133,12 @@ namespace LSTY.Sdtd.WebApi
                 var supportedCultures = new CultureInfo[]
                 {
                     new CultureInfo("en"),
-                    new CultureInfo("zh")
+                    new CultureInfo("zh-cn")
                 };
 
                 // State what the default culture for your application is. This will be used if no specific culture
                 // can be determined for a given request.
-                options.DefaultRequestCulture = new RequestCulture("zh");
+                options.DefaultRequestCulture = new RequestCulture("zh-cn");
 
                 // You must explicitly state which cultures your application supports.
                 // These are the cultures the app supports for formatting numbers, dates, etc.
@@ -146,6 +146,8 @@ namespace LSTY.Sdtd.WebApi
 
                 // These are the cultures the app supports for UI strings, i.e. we have localized resources for.
                 options.SupportedUICultures = supportedCultures;
+
+                options.ApplyCurrentCultureToResponseHeaders = true;
             });
 
             #endregion 全球化&本地化
@@ -242,13 +244,22 @@ namespace LSTY.Sdtd.WebApi
 
             #region 跨域
             bool enableCors = config.GetSection("EnableCors").Get<bool>();
+            var allowedOrigins = config.GetSection("AllowedOrigins").Get<string[]>();
             if (enableCors)
             {
                 services.AddCors(options =>
                 {
                     options.AddPolicy("Cors", builder =>
                     {
-                        builder.AllowAnyOrigin();
+                        if(allowedOrigins == null || allowedOrigins.Length == 0)
+                        {
+                            builder.AllowAnyOrigin();
+                        }
+                        else
+                        {
+                            builder.WithOrigins(allowedOrigins);
+                            builder.AllowCredentials();
+                        }
                         builder.AllowAnyHeader();
                         builder.AllowAnyMethod();
                     });

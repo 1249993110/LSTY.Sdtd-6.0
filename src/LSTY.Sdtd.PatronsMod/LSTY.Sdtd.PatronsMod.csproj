@@ -114,7 +114,7 @@
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>H:\steam\steamapps\common\7 Days to Die Dedicated Server\Mods\LSTY.Sdtd.PatronsMod-6.0</OutputPath>
+		<OutputPath>D:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server\Mods\LSTY.Sdtd.PatronsMod-6.0</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
@@ -125,7 +125,7 @@
 
 	<!--<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<PostBuildEvent>
-			cd /D "H:\steam\steamapps\common\7 Days to Die Dedicated Server"
+			cd /D "D:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server"
 			powershell start-process -FilePath startdedicated.bat
 		</PostBuildEvent>
 	</PropertyGroup>-->

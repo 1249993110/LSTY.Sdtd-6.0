@@ -79,7 +79,7 @@
                 this.outputLog('WebSocket connection closed, prepare to try reconnect', 3, true);
             });
 
-            top.Vue.prototype.$EventBus.$on('on_webSocket_connecting', () => {
+            top.Vue.prototype.$EventBus.$on('on_webSocket_error', () => {
                 this.outputLog('Error in webSocket connection', 0, true);
             });
 

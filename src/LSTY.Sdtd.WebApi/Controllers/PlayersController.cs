@@ -71,7 +71,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <returns></returns>
         [HttpGet("{entityId}")]
         [SucceededResponseType(typeof(LivePlayer))]
-        public async Task<IResponse> LivePlayers(int entityId, bool realTime)
+        public async Task<IResponse> LivePlayers([FromRoute] int entityId, bool realTime)
         {
             if (realTime)
             {
@@ -102,7 +102,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <returns></returns>
         [HttpGet("{entityId}")]
         [SucceededResponseType(typeof(Inventory))]
-        public async Task<IResponse> PlayerInventory(int entityId)
+        public async Task<IResponse> PlayerInventory([FromRoute] int entityId)
         {
             Inventory data = null;
             if (_livePlayers.ContainsPlayer(entityId))
@@ -147,7 +147,7 @@ namespace LSTY.Sdtd.WebApi.Controllers
         /// <returns></returns>
         [HttpGet("{entityId}")]
         [SucceededResponseType(typeof(T_Player))]
-        public async Task<IResponse> HistoryPlayers(int entityId)
+        public async Task<IResponse> HistoryPlayers([FromRoute] int entityId)
         {
             var player = await _playerRepository.QueryByIdAsync(nameof(T_Player.EntityId), entityId);
 
