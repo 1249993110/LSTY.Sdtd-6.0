@@ -6,6 +6,7 @@ using LSTY.Sdtd.Data.IRepositories;
 using LSTY.Sdtd.Services.HubReceivers;
 using LSTY.Sdtd.Services.Managers;
 using LSTY.Sdtd.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -14,17 +15,17 @@ using System.Text.Json.Serialization;
 namespace LSTY.Sdtd.WebApi.Controllers
 {
     /// <summary>
-    /// 登录
+    /// 认证
     /// </summary>
     [Route("[controller]/[action]")]
-    public class LoginController : ApiControllerBase
+    public class AuthenticateController : ApiControllerBase
     {
         /// <summary>
-        /// 检查权限
+        /// 检查凭证
         /// </summary>
         [HttpPost]
         [SucceededResponseType(typeof(Response))]
-        public IResponse Check()
+        public IResponse CheckToken()
         {
             return SucceededResult();
         }

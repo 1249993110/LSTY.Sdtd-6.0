@@ -133,12 +133,12 @@ namespace LSTY.Sdtd.WebApi
                 var supportedCultures = new CultureInfo[]
                 {
                     new CultureInfo("en"),
-                    new CultureInfo("zh-cn")
+                    new CultureInfo("zh-CN")
                 };
 
                 // State what the default culture for your application is. This will be used if no specific culture
                 // can be determined for a given request.
-                options.DefaultRequestCulture = new RequestCulture("zh-cn");
+                options.DefaultRequestCulture = new RequestCulture("zh-CN");
 
                 // You must explicitly state which cultures your application supports.
                 // These are the cultures the app supports for formatting numbers, dates, etc.

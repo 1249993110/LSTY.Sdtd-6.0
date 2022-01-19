@@ -55,7 +55,7 @@ namespace LSTY.Sdtd.Data.Repositories
         {
             string orderBy = null;
 
-            if (string.IsNullOrEmpty(dto.Order) == false)
+            if (string.IsNullOrEmpty(dto.Order) == false && typeof(V_ChatRecord).GetProperty(dto.Order) != null)// 避免sql注入
             {
                 orderBy = dto.Order + (dto.Desc ? "DESC" : "ASC");
             }

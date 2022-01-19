@@ -56,16 +56,16 @@ namespace LSTY.Sdtd.WebApi.Middlewares
         {
             SendMessageToAllClients(new WebSocketMessage()
             {
-                MessageType = Shared.Models.WebSocketMessageType.ConsoleLog,
-                MessageEntity = logEntry
+                EventType = WebSocketMessageTypes.ConsoleLog,
+                Payload = logEntry
             });
         }
         private void On_ModEventHookHub_ChatMessage(ChatMessage chatMessage)
         {
             SendMessageToAllClients(new WebSocketMessage() 
             {
-                MessageType = Shared.Models.WebSocketMessageType.ChatMessage,
-                MessageEntity = chatMessage
+                EventType = WebSocketMessageTypes.ChatMessage,
+                Payload = chatMessage
             });
         }
 
@@ -73,8 +73,8 @@ namespace LSTY.Sdtd.WebApi.Middlewares
         {
             SendMessageToAllClients(new WebSocketMessage()
             {
-                MessageType = Shared.Models.WebSocketMessageType.PlayerUpdate,
-                MessageEntity = livePlayers
+                EventType = WebSocketMessageTypes.PlayerUpdate,
+                Payload = livePlayers
             });
         }
 

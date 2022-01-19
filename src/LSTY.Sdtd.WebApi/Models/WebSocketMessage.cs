@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LSTY.Sdtd.Shared.Models
+namespace LSTY.Sdtd.WebApi.Models
 {
     public class WebSocketMessage
     {
-        public WebSocketMessageType MessageType { get; set; }
+        public string EventType { get; set; }
 
-        public object MessageEntity { get; set; }
+        public object Payload { get; set; }
     }
 }

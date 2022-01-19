@@ -12,7 +12,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="IceCoffee.Common" Version="1.0.1.2" />
-		<PackageReference Include="IceCoffee.DataAnnotations" Version="1.0.0.4" />
+		<PackageReference Include="IceCoffee.DataAnnotations" Version="1.0.0.6" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net45'">
